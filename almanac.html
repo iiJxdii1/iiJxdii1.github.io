@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Almanac — Your Study Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ DESIGN TOKENS ============ */
+:root{
+  --paper:#FBF8F4;
+  --paper-raised:#FFFFFF;
+  --ink:#2B2530;
+  --ink-soft:#6B6270;
+  --line:#E9E1D8;
+  --plum:#5B3A54;
+  --plum-deep:#432940;
+  --rose:#C98BA3;
+  --rose-soft:#F3E1E8;
+  --sage:#7C9A7E;
+  --sage-soft:#E4EDE3;
+  --amber:#C98A46;
+  --amber-soft:#F3E4CF;
+  --danger:#B0554A;
+  --danger-soft:#F4E1DC;
+  --shadow: 0 1px 2px rgba(43,37,48,0.04), 0 6px 20px rgba(43,37,48,0.05);
+  --radius-lg: 22px;
+  --radius-md: 14px;
+  --radius-sm: 9px;
+  --course-1:#5B3A54; --course-1-soft:#EDE2EA;
+  --course-2:#7C9A7E; --course-2-soft:#E4EDE3;
+  --course-3:#C98A46; --course-3-soft:#F3E4CF;
+  --course-4:#6B87A6; --course-4-soft:#E3E9F0;
+  --course-5:#C1786B; --course-5-soft:#F2E2DE;
+  --course-6:#9B8EC4; --course-6-soft:#EAE6F5;
+  --course-7:#B98A5E; --course-7-soft:#F0E3D2;
+  --course-8:#5F9C9C; --course-8-soft:#DEEDED;
+}
+[data-theme="dark"]{
+  --paper:#1D1920;
+  --paper-raised:#26212A;
+  --ink:#F1EBE7;
+  --ink-soft:#B0A6AE;
+  --line:#38313B;
+  --plum:#C99BC0;
+  --plum-deep:#E4C4DD;
+  --rose:#D9A6BB;
+  --rose-soft:#3A2A32;
+  --sage:#9DBC9C;
+  --sage-soft:#28332A;
+  --amber:#E0B37E;
+  --amber-soft:#3B2F22;
+  --danger:#E0958A;
+  --danger-soft:#3A2523;
+  --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.28);
+  --course-1-soft:#332B37; --course-2-soft:#243026; --course-3-soft:#372E22;
+  --course-4-soft:#252C36; --course-5-soft:#372823; --course-6-soft:#2E2A3D;
+  --course-7-soft:#352B21; --course-8-soft:#22322F;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  transition:background .25s ease, color .25s ease;
+}
+h1,h2,h3,.serif{font-family:'Fraunces',serif;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+a{color:inherit;}
+::selection{background:var(--rose-soft);}
+.scrollbar-thin::-webkit-scrollbar{width:6px;height:6px;}
+.scrollbar-thin::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px;}
+
+/* ============ LAYOUT ============ */
+#shell{display:flex;min-height:100vh;}
+#sidebar{
+  width:236px;flex-shrink:0;background:var(--paper-raised);
+  border-right:1px solid var(--line);display:flex;flex-direction:column;
+  padding:22px 14px;position:sticky;top:0;height:100vh;transition:width .2s ease, padding .2s ease;
+  z-index:40;
+}
+#sidebar.collapsed{width:74px;}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 22px 8px;}
+.brand-mark{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--plum),var(--rose));flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Fraunces',serif;font-weight:600;font-size:16px;}
+.brand-name{font-family:'Fraunces',serif;font-size:19px;font-weight:600;white-space:nowrap;overflow:hidden;}
+#sidebar.collapsed .brand-name, #sidebar.collapsed .navlabel, #sidebar.collapsed .side-foot-text{display:none;}
+.navgroup{display:flex;flex-direction:column;gap:2px;margin-top:6px;}
+.navitem{
+  display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-sm);
+  color:var(--ink-soft);font-size:14.5px;font-weight:500;border:none;background:transparent;text-align:left;width:100%;
+  transition:background .15s ease,color .15s ease;
+}
+.navitem svg{flex-shrink:0;width:18px;height:18px;}
+.navitem:hover{background:var(--sand,var(--rose-soft));color:var(--ink);}
+.navitem.active{background:var(--plum);color:#fff;}
+.side-foot{margin-top:auto;padding:10px 8px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--rose-soft);color:var(--plum);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;flex-shrink:0;}
+.side-foot-text{overflow:hidden;}
+.side-foot-text .n{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.side-foot-text .p{font-size:11.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.collapse-btn{margin-left:auto;background:none;border:none;color:var(--ink-soft);padding:4px;border-radius:8px;}
+.collapse-btn:hover{background:var(--rose-soft);}
+
+#main{flex:1;min-width:0;display:flex;flex-direction:column;}
+#topbar{
+  display:flex;align-items:center;gap:14px;padding:16px 28px;position:sticky;top:0;
+  background:color-mix(in srgb, var(--paper) 88%, transparent);backdrop-filter:blur(8px);
+  z-index:30;border-bottom:1px solid transparent;
+}
+#topbar.scrolled{border-bottom:1px solid var(--line);}
+.search-trigger{
+  flex:1;max-width:420px;display:flex;align-items:center;gap:8px;background:var(--paper-raised);
+  border:1px solid var(--line);border-radius:999px;padding:9px 14px;color:var(--ink-soft);font-size:13.5px;
+}
+.search-trigger kbd{margin-left:auto;font-size:11px;background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:1px 6px;}
+.icon-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--paper-raised);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);flex-shrink:0;position:relative;}
+.icon-btn:hover{color:var(--ink);border-color:var(--ink-soft);}
+.icon-btn svg{width:17px;height:17px;}
+.notif-dot{position:absolute;top:8px;right:8px;width:7px;height:7px;border-radius:50%;background:var(--danger);}
+#content{padding:8px 28px 60px 28px;flex:1;}
+
+@media (max-width:880px){
+  #sidebar{position:fixed;left:-260px;height:100vh;box-shadow:var(--shadow);}
+  #sidebar.mobile-open{left:0;}
+  #sidebar.collapsed{width:236px;}
+  #main{width:100%;}
+  #content{padding:8px 16px 90px 16px;}
+  #topbar{padding:14px 16px;}
+  .search-trigger{max-width:none;}
+  .search-trigger kbd{display:none;}
+}
+
+/* ============ COMPONENTS ============ */
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:18px 0 22px 0;flex-wrap:wrap;}
+.page-title{font-size:28px;font-weight:600;margin:0;}
+.page-sub{color:var(--ink-soft);font-size:14px;margin-top:4px;}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;border:none;border-radius:999px;padding:10px 18px;
+  font-size:13.5px;font-weight:600;background:var(--plum);color:#fff;transition:transform .12s ease, opacity .15s ease;
+}
+.btn:hover{opacity:.9;}
+.btn:active{transform:scale(.97);}
+.btn.secondary{background:var(--paper-raised);color:var(--ink);border:1px solid var(--line);}
+.btn.ghost{background:transparent;color:var(--ink-soft);padding:8px 10px;}
+.btn.ghost:hover{color:var(--ink);}
+.btn.danger{background:var(--danger-soft);color:var(--danger);}
+.btn svg{width:15px;height:15px;}
+.card{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);}
+.card-title{font-family:'Fraunces',serif;font-size:17px;font-weight:600;margin:0 0 4px 0;}
+.grid{display:grid;gap:18px;}
+.g2{grid-template-columns:1.4fr 1fr;}
+.g3{grid-template-columns:repeat(3,1fr);}
+.g4{grid-template-columns:repeat(4,1fr);}
+@media(max-width:1000px){.g2,.g3,.g4{grid-template-columns:1fr;}}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:999px;}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:44px 20px;color:var(--ink-soft);}
+.empty .emoji{font-size:30px;margin-bottom:10px;}
+.empty .t{font-weight:600;color:var(--ink);margin-bottom:4px;}
+.empty .s{font-size:13px;max-width:280px;}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.progress-track{height:8px;background:var(--line);border-radius:999px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:999px;background:var(--plum);transition:width .4s ease;}
+hr.soft{border:none;border-top:1px solid var(--line);margin:14px 0;}
+input[type=text],input[type=date],input[type=time],input[type=number],select,textarea{
+  width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);
+  color:var(--ink);font-size:13.5px;outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--plum);}
+label.field-label{font-size:12.5px;font-weight:600;color:var(--ink-soft);display:block;margin-bottom:5px;}
+.field{margin-bottom:13px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(30,25,32,0.42);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;backdrop-filter:blur(2px);}
+.modal{background:var(--paper-raised);border-radius:var(--radius-lg);padding:26px;width:100%;max-width:460px;max-height:88vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+.modal.wide{max-width:640px;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.modal-head h3{margin:0;font-size:19px;}
+.close-x{border:none;background:var(--paper);color:var(--ink-soft);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;}
+
+/* toast */
+#toast-wrap{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;}
+.toast{background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:999px;font-size:13px;box-shadow:var(--shadow);animation:toastin .2s ease;}
+@keyframes toastin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* sidebar nav sub */
+.sidebar-scrim{display:none;}
+@media(max-width:880px){.sidebar-scrim.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:39;}}
+
+/* Dashboard timeline */
+.timeline{position:relative;padding-left:56px;}
+.tl-hour{position:relative;height:64px;border-top:1px solid var(--line);}
+.tl-hour:first-child{border-top:none;}
+.tl-hour .lbl{position:absolute;left:-56px;top:-8px;font-size:11px;color:var(--ink-soft);width:46px;text-align:right;}
+.tl-block{position:absolute;left:4px;right:4px;border-radius:var(--radius-sm);padding:8px 10px;overflow:hidden;cursor:pointer;border-left:3px solid;}
+.tl-block .tb-name{font-weight:700;font-size:13px;}
+.tl-block .tb-meta{font-size:11.5px;opacity:.85;margin-top:2px;}
+
+.deadline-row,.exam-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);}
+.deadline-row:last-child,.exam-row:last-child{border-bottom:none;}
+.check-circle{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.check-circle.done{background:var(--sage);border-color:var(--sage);color:#fff;}
+.countdown-badge{font-family:'Fraunces',serif;font-weight:600;font-size:15px;padding:4px 12px;border-radius:999px;flex-shrink:0;}
+
+/* course chip / cards */
+.course-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px;cursor:pointer;position:relative;overflow:hidden;transition:transform .15s ease,box-shadow .15s ease;}
+.course-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
+.course-card .accent-bar{position:absolute;top:0;left:0;right:0;height:5px;}
+.course-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+
+/* tabs */
+.tabbar{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto;}
+.tabbtn{padding:10px 4px;margin-right:20px;background:none;border:none;font-size:14px;font-weight:600;color:var(--ink-soft);border-bottom:2px solid transparent;white-space:nowrap;}
+.tabbtn.active{color:var(--plum);border-color:var(--plum);}
+
+/* task list */
+.task-row{display:flex;align-items:flex-start;gap:12px;padding:13px 4px;border-bottom:1px solid var(--line);}
+.task-row:last-child{border-bottom:none;}
+.priority-pill{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.3px;}
+
+/* calendar */
+.cal-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.viewswitch{display:flex;background:var(--paper-raised);border:1px solid var(--line);border-radius:999px;padding:3px;}
+.viewswitch button{border:none;background:none;padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--ink-soft);}
+.viewswitch button.active{background:var(--plum);color:#fff;}
+.week-grid{display:grid;grid-template-columns:56px repeat(7,1fr);background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;}
+.week-head{padding:10px 4px;text-align:center;font-size:12px;font-weight:700;color:var(--ink-soft);border-bottom:1px solid var(--line);border-left:1px solid var(--line);}
+.week-head .d{font-family:'Fraunces',serif;font-size:16px;color:var(--ink);display:block;}
+.week-head.today{background:var(--rose-soft);}
+.week-col{position:relative;border-left:1px solid var(--line);}
+.week-corner{border-bottom:1px solid var(--line);}
+.week-day-body{position:relative;}
+.week-hourline{height:52px;border-top:1px solid var(--line);}
+.week-hourline:first-child{border-top:none;}
+.hourlabels .hl{height:52px;font-size:10.5px;color:var(--ink-soft);text-align:right;padding-right:6px;transform:translateY(-6px);}
+.ev-block{position:absolute;left:3px;right:3px;border-radius:8px;padding:5px 7px;font-size:11px;overflow:hidden;cursor:grab;border-left:3px solid;line-height:1.25;}
+.ev-block:active{cursor:grabbing;}
+.ev-block b{display:block;font-size:11.5px;}
+.month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;}
+.month-cell{background:var(--paper-raised);min-height:100px;padding:6px;font-size:11px;}
+.month-cell .num{font-family:'Fraunces',serif;font-weight:600;font-size:13px;margin-bottom:4px;}
+.month-cell.other{opacity:.4;}
+.month-cell.today .num{color:#fff;background:var(--plum);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.month-chip{font-size:10px;padding:2px 5px;border-radius:5px;margin-bottom:2px;border-left:2px solid;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.day-list-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);align-items:center;}
+
+/* notes */
+.notes-layout{display:grid;grid-template-columns:260px 1fr;gap:18px;}
+@media(max-width:880px){.notes-layout{grid-template-columns:1fr;}}
+.note-item{padding:12px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid transparent;}
+.note-item:hover{background:var(--rose-soft);}
+.note-item.active{background:var(--rose-soft);border-color:var(--rose);}
+.note-item .nt{font-weight:600;font-size:13.5px;}
+.note-item .np{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+.editor-toolbar{display:flex;gap:4px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.etb-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--paper);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--ink-soft);}
+.etb-btn:hover{background:var(--rose-soft);color:var(--ink);}
+.note-editor{min-height:340px;outline:none;font-size:14.5px;line-height:1.7;}
+.note-editor:empty:before{content:attr(data-ph);color:var(--ink-soft);}
+.note-editor ul,.note-editor ol{padding-left:22px;}
+.note-editor code{background:var(--paper);padding:1px 6px;border-radius:5px;font-family:monospace;}
+
+/* pomodoro */
+.pomo-ring{width:200px;height:200px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;}
+.pomo-time{font-family:'Fraunces',serif;font-size:40px;font-weight:600;}
+.pomo-controls{display:flex;justify-content:center;gap:10px;margin-top:18px;}
+.pomo-round{width:46px;height:46px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;background:var(--plum);color:#fff;}
+.pomo-round.secondary{background:var(--paper);color:var(--ink);border:1px solid var(--line);}
+
+/* grades */
+.grade-bar-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.grade-bar-row .gname{width:150px;font-size:13px;font-weight:600;flex-shrink:0;}
+.grade-bar-row .gtrack{flex:1;height:10px;background:var(--line);border-radius:999px;overflow:hidden;}
+.grade-bar-row .gfill{height:100%;border-radius:999px;}
+.grade-bar-row .gval{width:56px;text-align:right;font-family:'Fraunces',serif;font-weight:600;font-size:14px;flex-shrink:0;}
+
+/* onboarding */
+#onboard-overlay{position:fixed;inset:0;background:var(--paper);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+.ob-card{max-width:560px;width:100%;}
+.ob-progress{display:flex;gap:6px;margin-bottom:24px;}
+.ob-progress span{height:4px;flex:1;background:var(--line);border-radius:99px;}
+.ob-progress span.done{background:var(--plum);}
+.chip-select{display:flex;flex-wrap:wrap;gap:8px;}
+.chip-opt{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--paper-raised);font-size:13px;font-weight:600;}
+.chip-opt.sel{background:var(--plum);color:#fff;border-color:var(--plum);}
+.course-input-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px;}
+
+/* search palette */
+.palette{width:100%;max-width:560px;background:var(--paper-raised);border-radius:var(--radius-lg);box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;}
+.palette-input{width:100%;border:none;border-bottom:1px solid var(--line);padding:18px 20px;font-size:16px;outline:none;background:transparent;color:var(--ink);border-radius:0;}
+.palette-results{max-height:360px;overflow:auto;padding:8px;}
+.pr-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);font-size:13.5px;}
+.pr-item:hover{background:var(--rose-soft);cursor:pointer;}
+.pr-kind{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.4px;margin-left:auto;}
+
+.fab{position:fixed;bottom:26px;right:26px;width:56px;height:56px;border-radius:50%;background:var(--plum);color:#fff;border:none;box-shadow:0 8px 24px rgba(91,58,84,0.4);display:flex;align-items:center;justify-content:center;z-index:60;}
+.fab svg{width:24px;height:24px;}
+.fab-menu{position:fixed;bottom:92px;right:26px;background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius-md);box-shadow:var(--shadow);padding:8px;z-index:60;display:flex;flex-direction:column;gap:2px;min-width:190px;}
+.fab-menu button{display:flex;align-items:center;gap:10px;padding:9px 10px;border:none;background:none;border-radius:8px;font-size:13.5px;font-weight:500;text-align:left;color:var(--ink);}
+.fab-menu button:hover{background:var(--rose-soft);}
+
+.attn-banner{display:flex;align-items:center;gap:10px;background:var(--amber-soft);color:var(--amber);border-radius:var(--radius-md);padding:12px 16px;font-size:13.5px;font-weight:600;margin-bottom:14px;}
+.attn-banner.plain-ink{color:var(--ink);}
+.next-up{display:flex;align-items:center;gap:14px;background:linear-gradient(120deg,var(--plum),var(--plum-deep));color:#fff;border-radius:var(--radius-lg);padding:20px;}
+.next-up .nu-label{font-size:12px;opacity:.75;text-transform:uppercase;letter-spacing:.6px;font-weight:700;}
+.next-up .nu-title{font-family:'Fraunces',serif;font-size:19px;margin:4px 0;}
+.next-up .nu-sub{font-size:13px;opacity:.85;}
+
+.mobile-menu-btn{display:none;}
+@media(max-width:880px){.mobile-menu-btn{display:flex;}}
+</style>
+</head>
+<body data-theme="light">
+<div id="toast-wrap"></div>
+<div id="app"></div>
+
+<script>
+/* ======================================================================
+   ALMANAC — personal university study command center
+   Single-file vanilla JS app. Persists locally in the browser via localStorage (single-device, no account needed).
+   ====================================================================== */
+
+const STORE_KEY = 'almanac-data-v1';
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAY_NAMES_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const COURSE_COLORS = ['course-1','course-2','course-3','course-4','course-5','course-6','course-7','course-8'];
+
+function uid(){ return Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4); }
+function todayISO(){ const d=new Date(); return isoDate(d); }
+function isoDate(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function parseISO(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+function addDays(d,n){ const nd=new Date(d); nd.setDate(nd.getDate()+n); return nd; }
+function startOfWeek(d){ const nd=new Date(d); const day=nd.getDay(); return addDays(nd,-day); }
+function fmtDateHuman(iso){ const d=parseISO(iso); return d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}); }
+function fmtMonthYear(d){ return d.toLocaleDateString(undefined,{month:'long',year:'numeric'}); }
+function minutesBetween(t1,t2){ const [h1,m1]=t1.split(':').map(Number); const [h2,m2]=t2.split(':').map(Number); return (h2*60+m2)-(h1*60+m1); }
+function timeToY(t,pxPerHour){ const [h,m]=t.split(':').map(Number); return (h+m/60)*pxPerHour; }
+function daysUntil(iso, timeStr){
+  const now = new Date();
+  const target = parseISO(iso);
+  if(timeStr){ const [h,m]=timeStr.split(':').map(Number); target.setHours(h,m,0,0); } else { target.setHours(23,59,0,0); }
+  const diffMs = target - now;
+  return diffMs/ (1000*60*60*24);
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function toast(msg){
+  const wrap=document.getElementById('toast-wrap');
+  const el=document.createElement('div'); el.className='toast'; el.textContent=msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300);},2200);
+}
+
+/* ---------- default data ---------- */
+function defaultData(){
+  return {
+    profile:{ name:'', university:'', program:'', year:'', semester:'', onboarded:false, theme:'light',
+      weeklyGoalHours:15, notif:{examHours:24, taskHours:24, sessionMinutes:15} },
+    courses:[],
+    tasks:[],
+    exams:[],
+    notes:[],
+    sessions:[],
+    events:[],
+    grades:{} // courseId -> [{id,label,type,grade,coefficient}]
+  };
+}
+
+/* ---------- app state ---------- */
+let DATA = defaultData();
+let saveTimer=null;
+let VIEW = 'dashboard';
+let ROUTE_PARAM = null;
+let SIDEBAR_COLLAPSED = false;
+let MOBILE_SIDEBAR_OPEN = false;
+
+async function loadData(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+     if(raw){
+       const parsed = JSON.parse(raw);
+      DATA = Object.assign(defaultData(), parsed);
+      DATA.profile = Object.assign(defaultData().profile, parsed.profile||{});
+    }
+  }catch(e){ /* key not found yet — first run */ }
+}
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(DATA)); }
+     catch(e){ console.error('save failed', e); toast('Could not save — browser storage unavailable'); }
+  }, 350);
+}
+
+/* ---------- course helpers ---------- */
+function courseColor(courseId){
+  const idx = DATA.courses.findIndex(c=>c.id===courseId);
+  if(idx<0) return 'course-1';
+  return DATA.courses[idx].colorClass || COURSE_COLORS[idx % COURSE_COLORS.length];
+}
+function courseById(id){ return DATA.courses.find(c=>c.id===id); }
+function courseName(id){ const c=courseById(id); return c? c.name : '—'; }
+
+/* ---------- derived: today's schedule blocks ---------- */
+function scheduleForDate(dateObj){
+  const dow = dateObj.getDay();
+  const iso = isoDate(dateObj);
+  const blocks = [];
+  DATA.courses.forEach(course=>{
+    (course.schedule||[]).forEach(sch=>{
+      if(sch.day === dow){
+        blocks.push({ kind:'class', courseId:course.id, start:sch.start, end:sch.end, room:sch.room, professor:course.professor, type:sch.type, id:sch.id, iso });
+      }
+    });
+  });
+  DATA.exams.forEach(ex=>{
+    if(ex.date===iso){ blocks.push({kind:'exam', courseId:ex.courseId, start:ex.time||'09:00', end:addMinutesToTime(ex.time||'09:00',90), room:ex.location, type:'Exam', id:ex.id, iso}); }
+  });
+  DATA.sessions.forEach(s=>{
+    if(s.date===iso){ blocks.push({kind:'session', courseId:s.courseId, start:s.start, end:addMinutesToTime(s.start,s.duration||60), room:s.topic, type:'Study', id:s.id, iso}); }
+  });
+  DATA.events.forEach(ev=>{
+    if(ev.date===iso){ blocks.push({kind:'event', courseId:null, start:ev.start||'09:00', end:ev.end||addMinutesToTime(ev.start||'09:00',60), room:ev.notes, type:'Event', title:ev.title, id:ev.id, iso}); }
+  });
+  blocks.sort((a,b)=> a.start.localeCompare(b.start));
+  return blocks;
+}
+function addMinutesToTime(t,mins){
+  const [h,m]=t.split(':').map(Number);
+  const total = h*60+m+mins;
+  const nh = Math.floor(((total%1440)+1440)%1440/60), nm = ((total%60)+60)%60;
+  return String(nh).padStart(2,'0')+':'+String(nm).padStart(2,'0');
+}
+
+/* ---------- study time aggregation ---------- */
+function studyMinutesInRange(fromDate,toDate){
+  return DATA.sessions.filter(s=>{
+    const d = parseISO(s.date);
+    return d>=fromDate && d<=toDate && s.completed;
+  }).reduce((sum,s)=> sum + (s.duration||0), 0);
+}
+function fmtHM(mins){
+  const h=Math.floor(mins/60), m=Math.round(mins%60);
+  if(h<=0) return m+'m';
+  return h+'h '+(m? m+'m':'').trim();
+}
+
+/* ---------- ROUTER / RENDER ---------- */
+function navigate(view, param){
+  VIEW = view; ROUTE_PARAM = param || null;
+  MOBILE_SIDEBAR_OPEN = false;
+  render();
+  window.scrollTo(0,0);
+}
+
+function render(){
+  const app = document.getElementById('app');
+  document.body.setAttribute('data-theme', DATA.profile.theme || 'light');
+
+  if(!DATA.profile.onboarded){
+    app.innerHTML = renderOnboarding();
+    bindOnboarding();
+    return;
+  }
+
+  app.innerHTML = `
+    <div id="shell">
+      <div class="sidebar-scrim ${MOBILE_SIDEBAR_OPEN?'show':''}" onclick="MOBILE_SIDEBAR_OPEN=false;render();"></div>
+      ${renderSidebar()}
+      <div id="main">
+        ${renderTopbar()}
+        <div id="content">${renderView()}</div>
+      </div>
+    </div>
+    ${renderFab()}
+  `;
+  bindGlobal();
+  bindViewHandlers();
+}
+
+function renderSidebar(){
+  const items = [
+    {id:'dashboard', label:'Dashboard', icon:iconHome()},
+    {id:'calendar', label:'Calendar', icon:iconCalendar()},
+    {id:'courses', label:'Courses', icon:iconBook()},
+    {id:'tasks', label:'Tasks', icon:iconCheck()},
+    {id:'exams', label:'Exams', icon:iconClock()},
+    {id:'notes', label:'Notes', icon:iconNote()},
+    {id:'planner', label:'Study Planner', icon:iconTarget()},
+    {id:'grades', label:'Grades', icon:iconChart()},
+    {id:'settings', label:'Settings', icon:iconGear()},
+  ];
+  return `
+  <div id="sidebar" class="${SIDEBAR_COLLAPSED?'collapsed':''} ${MOBILE_SIDEBAR_OPEN?'mobile-open':''}">
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div class="brand-name">Almanac</div>
+      <button class="collapse-btn" onclick="SIDEBAR_COLLAPSED=!SIDEBAR_COLLAPSED;render();" title="Collapse">${iconChevronLeft()}</button>
+    </div>
+    <div class="navgroup">
+      ${items.map(it=>`<button class="navitem ${VIEW===it.id?'active':''}" onclick="navigate('${it.id}')">${it.icon}<span class="navlabel">${it.label}</span></button>`).join('')}
+    </div>
+    <div class="side-foot">
+      <div class="avatar">${(DATA.profile.name||'S').charAt(0).toUpperCase()}</div>
+      <div class="side-foot-text">
+        <div class="n">${escapeHtml(DATA.profile.name||'Student')}</div>
+        <div class="p">${escapeHtml(DATA.profile.program||DATA.profile.university||'')}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderTopbar(){
+  const titles = {dashboard:'Dashboard',calendar:'Calendar',courses:'Courses',tasks:'Tasks',exams:'Exams',notes:'Notes',planner:'Study Planner',grades:'Grades',settings:'Settings',course_detail:'Course'};
+  return `
+  <div id="topbar">
+    <button class="icon-btn mobile-menu-btn" onclick="MOBILE_SIDEBAR_OPEN=true;render();">${iconMenu()}</button>
+    <button class="search-trigger" onclick="openSearch()">${iconSearch()}<span>Search courses, tasks, notes…</span><kbd>⌘K</kbd></button>
+    <button class="icon-btn" onclick="toggleTheme()" title="Toggle dark mode">${DATA.profile.theme==='dark'?iconSun():iconMoon()}</button>
+    <button class="icon-btn" onclick="openNotifications()" title="Notifications">${iconBell()}${getNotifications().length? '<span class="notif-dot"></span>':''}</button>
+  </div>`;
+}
+
+function renderFab(){
+  return `
+  <div id="fab-menu-holder"></div>
+  <button class="fab" onclick="toggleFabMenu()">${iconPlus()}</button>`;
+}
+
+let FAB_OPEN=false;
+function toggleFabMenu(){
+  FAB_OPEN=!FAB_OPEN;
+  const holder=document.getElementById('fab-menu-holder');
+  if(!FAB_OPEN){ holder.innerHTML=''; return; }
+  holder.innerHTML = `
+  <div class="fab-menu">
+    <button onclick="closeFab();openTaskModal();">${iconCheck()} Add task</button>
+    <button onclick="closeFab();openSessionModal();">${iconTarget()} Add study session</button>
+    <button onclick="closeFab();navigate('planner');setTimeout(()=>startPomodoroQuick(),50);">${iconClock()} Start Pomodoro</button>
+    <button onclick="closeFab();openEventModal();">${iconCalendar()} Add calendar event</button>
+    <button onclick="closeFab();openNoteModal();">${iconNote()} Add note</button>
+  </div>`;
+}
+function closeFab(){ FAB_OPEN=false; document.getElementById('fab-menu-holder').innerHTML=''; }
+
+function toggleTheme(){
+  DATA.profile.theme = DATA.profile.theme==='dark' ? 'light' : 'dark';
+  scheduleSave(); render();
+}
+
+function bindGlobal(){
+  document.addEventListener('keydown', globalKeyHandler);
+}
+function globalKeyHandler(e){
+  if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); openSearch(); }
+}
+
+/* ===================== ICONS (minimal inline SVG, stroke-based) ===================== */
+function icon(path, extra=''){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${path}</svg>${extra}`; }
+function iconHome(){ return icon('<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>'); }
+function iconCalendar(){ return icon('<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/>'); }
+function iconBook(){ return icon('<path d="M4 5a2 2 0 012-2h11v16H6a2 2 0 00-2 2V5z"/><path d="M17 19H6a2 2 0 000 4h11"/>'); }
+function iconCheck(){ return icon('<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12l3 3 5-6"/>'); }
+function iconClock(){ return icon('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>'); }
+function iconNote(){ return icon('<path d="M5 3h10l4 4v14H5z"/><path d="M15 3v4h4M9 12h6M9 16h6"/>'); }
+function iconTarget(){ return icon('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/>'); }
+function iconChart(){ return icon('<path d="M4 20V10M12 20V4M20 20v-7"/>'); }
+function iconGear(){ return icon('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.33 1.87l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.7 1.7 0 00-1.87-.33 1.7 1.7 0 00-1 1.55V21a2 2 0 01-4 0v-.09a1.7 1.7 0 00-1-1.55 1.7 1.7 0 00-1.87.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.7 1.7 0 004.6 15a1.7 1.7 0 00-1.55-1H3a2 2 0 010-4h.09A1.7 1.7 0 004.6 9a1.7 1.7 0 00-.33-1.87l-.06-.06a2 2 0 112.83-2.83l.06.06A1.7 1.7 0 009 4.6a1.7 1.7 0 001-1.55V3a2 2 0 014 0v.09a1.7 1.7 0 001 1.55 1.7 1.7 0 001.87-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.7 1.7 0 0019.4 9a1.7 1.7 0 001.55 1H21a2 2 0 010 4h-.09a1.7 1.7 0 00-1.55 1z"/>'); }
+function iconSearch(){ return icon('<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>'); }
+function iconBell(){ return icon('<path d="M6 8a6 6 0 1112 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 21a2 2 0 004 0"/>'); }
+function iconMoon(){ return icon('<path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/>'); }
+function iconSun(){ return icon('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'); }
+function iconPlus(){ return icon('<path d="M12 5v14M5 12h14"/>'); }
+function iconMenu(){ return icon('<path d="M3 6h18M3 12h18M3 18h18"/>'); }
+function iconChevronLeft(){ return icon('<path d="M15 18l-6-6 6-6"/>'); }
+function iconTrash(){ return icon('<path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0l-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6h16z"/>'); }
+function iconEdit(){ return icon('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/>'); }
+function iconX(){ return icon('<path d="M18 6L6 18M6 6l12 12"/>'); }
+function iconPlay(){ return icon('<path d="M7 4l13 8-13 8z"/>'); }
+function iconPause(){ return icon('<path d="M7 4h3v16H7zM14 4h3v16h-3z"/>'); }
+function iconReset(){ return icon('<path d="M4 4v6h6"/><path d="M20 20v-6h-6"/><path d="M5 15a8 8 0 0014.3-3M19 9A8 8 0 004.7 12"/>'); }
+
+/* ===================== ONBOARDING ===================== */
+let OB_STEP = 1;
+let OB_DATA = { name:'', university:'', program:'', year:'1st year', semester:'Semester 1', courses:[], schedule:false, exams:false };
+function renderOnboarding(){
+  const total=6;
+  const stepsHtml = {
+    1: `<h2 class="serif">Welcome — let's set up your space 🌿</h2>
+        <p class="page-sub">A few questions so Almanac feels like yours. You can change any of this later, or skip for now.</p>
+        <div class="field"><label class="field-label">Your name</label><input type="text" id="ob-name" value="${escapeHtml(OB_DATA.name)}" placeholder="e.g. Camille"></div>`,
+    2: `<h2 class="serif">Where do you study?</h2>
+        <div class="field"><label class="field-label">University</label><input type="text" id="ob-uni" value="${escapeHtml(OB_DATA.university)}" placeholder="e.g. UPPA"></div>
+        <div class="field"><label class="field-label">Degree / program</label><input type="text" id="ob-program" value="${escapeHtml(OB_DATA.program)}" placeholder="e.g. Double Licence Droit & Économie-Gestion"></div>`,
+    3: `<h2 class="serif">Where are you in your studies?</h2>
+        <div class="field"><label class="field-label">Year</label>
+          <div class="chip-select" id="ob-year">${['1st year','2nd year','3rd year','4th year','5th year'].map(y=>`<div class="chip-opt ${OB_DATA.year===y?'sel':''}" data-v="${y}">${y}</div>`).join('')}</div>
+        </div>
+        <div class="field"><label class="field-label">Semester</label>
+          <div class="chip-select" id="ob-sem">${['Semester 1','Semester 2'].map(y=>`<div class="chip-opt ${OB_DATA.semester===y?'sel':''}" data-v="${y}">${y}</div>`).join('')}</div>
+        </div>`,
+    4: `<h2 class="serif">What courses are you taking?</h2>
+        <p class="page-sub">Add a few now — you can add more anytime from the Courses page.</p>
+        <div id="ob-course-rows">${OB_DATA.courses.map((c,i)=>`<div class="course-input-row"><input type="text" class="ob-course-name" value="${escapeHtml(c)}"><button class="btn ghost" onclick="obRemoveCourse(${i})">${iconX()}</button></div>`).join('')}</div>
+        <button class="btn secondary" onclick="obAddCourseRow()">${iconPlus()} Add course</button>`,
+    5: `<h2 class="serif">Weekly schedule & exams</h2>
+        <p class="page-sub">You can build your full timetable and add exam dates right after setup, from the Calendar and Exams pages.</p>
+        <div class="card" style="text-align:left;background:var(--rose-soft);border:none;">
+          <p style="margin:0;font-size:13.5px;">💡 Tip: head to <b>Calendar</b> to add your recurring classes, and <b>Exams</b> to log upcoming exam dates with countdowns.</p>
+        </div>`,
+    6: `<h2 class="serif">You're all set${OB_DATA.name? ', '+escapeHtml(OB_DATA.name):''} ✨</h2>
+        <p class="page-sub">Your dashboard, calendar, tasks, notes and grades are ready. Let's get organized.</p>`
+  };
+  return `
+  <div id="onboard-overlay">
+    <div class="ob-card">
+      <div class="ob-progress">${Array.from({length:total}).map((_,i)=>`<span class="${i<OB_STEP?'done':''}"></span>`).join('')}</div>
+      <div class="card" style="text-align:left;">
+        ${stepsHtml[OB_STEP]}
+        <div class="modal-actions" style="justify-content:space-between;margin-top:26px;">
+          <div>
+            ${OB_STEP>1? `<button class="btn ghost" onclick="obBack()">Back</button>`:'<span></span>'}
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn secondary" onclick="obSkip()">Skip setup</button>
+            <button class="btn" onclick="obNext(${total})">${OB_STEP===total? 'Go to dashboard':'Continue'}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function obAddCourseRow(){ OB_DATA.courses.push(''); render(); }
+function obRemoveCourse(i){ OB_DATA.courses.splice(i,1); render(); }
+function bindOnboarding(){
+  const nameEl=document.getElementById('ob-name'); if(nameEl) nameEl.oninput=e=>OB_DATA.name=e.target.value;
+  const uniEl=document.getElementById('ob-uni'); if(uniEl) uniEl.oninput=e=>OB_DATA.university=e.target.value;
+  const progEl=document.getElementById('ob-program'); if(progEl) progEl.oninput=e=>OB_DATA.program=e.target.value;
+  const yearWrap=document.getElementById('ob-year'); if(yearWrap) yearWrap.querySelectorAll('.chip-opt').forEach(el=>el.onclick=()=>{OB_DATA.year=el.dataset.v; render();});
+  const semWrap=document.getElementById('ob-sem'); if(semWrap) semWrap.querySelectorAll('.chip-opt').forEach(el=>el.onclick=()=>{OB_DATA.semester=el.dataset.v; render();});
+  document.querySelectorAll('.ob-course-name').forEach((el,i)=> el.oninput = e=>{ OB_DATA.courses[i]=e.target.value; });
+}
+function obNext(total){
+  if(OB_STEP===4){ document.querySelectorAll('.ob-course-name').forEach((el,i)=> OB_DATA.courses[i]=el.value); }
+  if(OB_STEP<total){ OB_STEP++; render(); if(OB_STEP===4 && OB_DATA.courses.length===0){ OB_DATA.courses=['']; render(); } }
+  else finishOnboarding();
+}
+function obBack(){ OB_STEP=Math.max(1,OB_STEP-1); render(); }
+function obSkip(){ finishOnboarding(true); }
+function finishOnboarding(skip){
+  if(!skip){
+    DATA.profile.name = OB_DATA.name;
+    DATA.profile.university = OB_DATA.university;
+    DATA.profile.program = OB_DATA.program;
+    DATA.profile.year = OB_DATA.year;
+    DATA.profile.semester = OB_DATA.semester;
+    OB_DATA.courses.filter(c=>c && c.trim()).forEach((name,i)=>{
+      DATA.courses.push({ id:uid(), name:name.trim(), code:'', professor:'', semester:OB_DATA.semester, credits:'', colorClass:COURSE_COLORS[DATA.courses.length%COURSE_COLORS.length], schedule:[] });
+    });
+  }
+  DATA.profile.onboarded = true;
+  scheduleSave();
+  navigate('dashboard');
+}
+
+/* ===================== VIEW DISPATCH ===================== */
+function renderView(){
+  switch(VIEW){
+    case 'dashboard': return renderDashboard();
+    case 'calendar': return renderCalendarView();
+    case 'courses': return renderCourses();
+    case 'course_detail': return renderCourseDetail(ROUTE_PARAM);
+    case 'tasks': return renderTasks();
+    case 'exams': return renderExams();
+    case 'notes': return renderNotes();
+    case 'planner': return renderPlanner();
+    case 'grades': return renderGrades();
+    case 'settings': return renderSettings();
+    default: return renderDashboard();
+  }
+}
+function bindViewHandlers(){
+  if(VIEW==='calendar') bindCalendarHandlers();
+  if(VIEW==='notes') bindNotesHandlers();
+  if(VIEW==='planner') bindPlannerHandlers();
+}
+
+/* ===================== SMART FEATURES ===================== */
+function coursesNeedingAttention(){
+  const out=[];
+  const now=new Date();
+  DATA.courses.forEach(c=>{
+    const upcomingExam = DATA.exams.filter(e=>e.courseId===c.id).map(e=>daysUntil(e.date,e.time)).filter(d=>d>=0 && d<=7)[0];
+    if(upcomingExam===undefined) return;
+    const lastSession = DATA.sessions.filter(s=>s.courseId===c.id && s.completed).sort((a,b)=>b.date.localeCompare(a.date))[0];
+    const daysSince = lastSession? Math.floor((now-parseISO(lastSession.date))/(1000*60*60*24)) : 999;
+    if(daysSince>=3){ out.push({course:c, daysSince: lastSession? daysSince : null}); }
+  });
+  return out;
+}
+function whatsNext(){
+  const candidates=[];
+  const now=new Date();
+  DATA.tasks.filter(t=>t.status!=='completed').forEach(t=>{
+    const d = daysUntil(t.deadline);
+    const weight = (t.priority==='urgent'?0:t.priority==='high'?1:t.priority==='medium'?2:3) + d/3;
+    candidates.push({type:'task', ref:t, score:weight, when:t.deadline});
+  });
+  DATA.exams.forEach(e=>{
+    const d = daysUntil(e.date,e.time);
+    if(d>=0) candidates.push({type:'exam', ref:e, score:d/5 - 2, when:e.date});
+  });
+  candidates.sort((a,b)=>a.score-b.score);
+  return candidates[0];
+}
+function getNotifications(){
+  const out=[];
+  DATA.exams.forEach(e=>{
+    const d=daysUntil(e.date,e.time);
+    if(d>=0 && d*24<=DATA.profile.notif.examHours) out.push({icon:'📚', text:`${courseName(e.courseId)} exam is coming up`, sub:fmtDateHuman(e.date)});
+  });
+  DATA.tasks.filter(t=>t.status!=='completed').forEach(t=>{
+    const d=daysUntil(t.deadline);
+    if(d>=0 && d*24<=DATA.profile.notif.taskHours) out.push({icon:'📝', text:`"${t.title}" is due soon`, sub:fmtDateHuman(t.deadline)});
+    if(d<0) out.push({icon:'⚠️', text:`"${t.title}" is overdue`, sub:fmtDateHuman(t.deadline)});
+  });
+  return out;
+}
+function openNotifications(){
+  const notifs = getNotifications();
+  openModal('Notifications', `
+    ${notifs.length? notifs.map(n=>`<div class="deadline-row"><span style="font-size:18px;">${n.icon}</span><div><div style="font-weight:600;font-size:13.5px;">${escapeHtml(n.text)}</div><div style="font-size:12px;color:var(--ink-soft);">${n.sub}</div></div></div>`).join(''):
+    `<div class="empty"><div class="emoji">🔔</div><div class="t">You're all caught up</div><div class="s">No pressing reminders right now.</div></div>`}
+  `);
+}
+
+/* ===================== DASHBOARD ===================== */
+function renderDashboard(){
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting = hour<12? 'Good morning' : hour<18? 'Good afternoon' : 'Good evening';
+  const todayBlocks = scheduleForDate(now);
+  const attention = coursesNeedingAttention();
+  const next = whatsNext();
+
+  const upcomingTasks = DATA.tasks.filter(t=>t.status!=='completed').sort((a,b)=>a.deadline.localeCompare(b.deadline)).slice(0,4);
+  const upcomingExams = DATA.exams.slice().sort((a,b)=> (a.date+ (a.time||'')).localeCompare(b.date+(b.time||''))).filter(e=>daysUntil(e.date,e.time)>=0).slice(0,3);
+
+  const weekStart = startOfWeek(now), weekEnd = addDays(weekStart,6);
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1), monthEnd = new Date(now.getFullYear(), now.getMonth()+1,0);
+  const weekMins = studyMinutesInRange(weekStart, weekEnd);
+  const monthMins = studyMinutesInRange(monthStart, monthEnd);
+  const tasksDoneThisWeek = DATA.tasks.filter(t=>t.status==='completed' && t.completedAt && parseISO(t.completedAt)>=weekStart).length;
+  const goalMins = (DATA.profile.weeklyGoalHours||15)*60;
+  const goalPct = Math.min(100, Math.round((weekMins/goalMins)*100 || 0));
+
+  return `
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">${greeting}, ${escapeHtml(DATA.profile.name||'there')} 👋</h1>
+      <div class="page-sub">${now.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})}</div>
+    </div>
+  </div>
+
+  ${next? `<div class="next-up" style="margin-bottom:20px;">
+    <div style="flex:1;">
+      <div class="nu-label">What's next</div>
+      <div class="nu-title">${next.type==='exam'? '📚 '+courseName(next.ref.courseId)+' exam' : '📝 '+escapeHtml(next.ref.title)}</div>
+      <div class="nu-sub">${next.type==='exam'? 'Exam on '+fmtDateHuman(next.ref.date) : (courseName(next.ref.courseId)||'')+' · due '+fmtDateHuman(next.ref.deadline)}</div>
+    </div>
+    <button class="btn secondary" onclick="navigate('${next.type==='exam'?'exams':'tasks'}')">View</button>
+  </div>` : ''}
+
+  ${attention.map(a=>`<div class="attn-banner">⚠️ <div><b>${escapeHtml(a.course.name)}</b> needs attention — ${a.daysSince? `no study session logged in ${a.daysSince} days`:'no study sessions logged yet'}, and an exam is within a week.</div></div>`).join('')}
+
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title">Today's schedule</div>
+      <div class="page-sub" style="margin-bottom:14px;">${todayBlocks.length} thing${todayBlocks.length!==1?'s':''} on your plate</div>
+      ${todayBlocks.length? renderDayTimeline(todayBlocks) : `<div class="empty"><div class="emoji">🌤️</div><div class="t">Nothing scheduled today</div><div class="s">Enjoy the breathing room, or get ahead on a task.</div></div>`}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div class="card">
+        <div class="card-title">Upcoming deadlines</div>
+        ${upcomingTasks.length? upcomingTasks.map(t=>`
+          <div class="deadline-row">
+            <button class="check-circle" onclick="toggleTaskDone('${t.id}')">${iconCheckMini()}</button>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;font-size:13.5px;">${escapeHtml(t.title)}</div>
+              <div style="font-size:12px;color:var(--ink-soft);">${escapeHtml(courseName(t.courseId))} · Due ${fmtDateHuman(t.deadline)}</div>
+            </div>
+            <span class="priority-pill" style="background:${priorityBg(t.priority)};color:${priorityFg(t.priority)};">${t.priority}</span>
+          </div>`).join('') : `<div class="empty"><div class="emoji">🎉</div><div class="t">Nothing due</div><div class="s">No tasks due today.</div></div>`}
+      </div>
+      <div class="card">
+        <div class="card-title">Upcoming exams</div>
+        ${upcomingExams.length? upcomingExams.map(e=>{
+          const d=Math.ceil(daysUntil(e.date,e.time));
+          return `<div class="exam-row">
+            <span class="dot" style="background:var(--${courseColor(e.courseId)});"></span>
+            <div style="flex:1;"><div style="font-weight:600;font-size:13.5px;">${escapeHtml(courseName(e.courseId))}</div><div style="font-size:12px;color:var(--ink-soft);">${fmtDateHuman(e.date)}</div></div>
+            <span class="countdown-badge" style="background:var(--${courseColor(e.courseId)}-soft);color:var(--${courseColor(e.courseId)});">${d}d</span>
+          </div>`;}).join('') : `<div class="empty"><div class="emoji">✨</div><div class="t">No upcoming exams</div><div class="s">Nothing on the horizon yet.</div></div>`}
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px;">
+    <div class="card-title">Study progress</div>
+    <div class="grid g4" style="margin-top:14px;">
+      <div><div class="page-sub">Tasks done this week</div><div class="serif" style="font-size:26px;font-weight:600;">${tasksDoneThisWeek}</div></div>
+      <div><div class="page-sub">Study hours this week</div><div class="serif" style="font-size:26px;font-weight:600;">${fmtHM(weekMins)}</div></div>
+      <div><div class="page-sub">Study hours this month</div><div class="serif" style="font-size:26px;font-weight:600;">${fmtHM(monthMins)}</div></div>
+      <div><div class="page-sub">Courses needing attention</div><div class="serif" style="font-size:26px;font-weight:600;">${attention.length}</div></div>
+    </div>
+    <hr class="soft">
+    <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;"><span>Weekly goal</span><span>${fmtHM(weekMins)} / ${DATA.profile.weeklyGoalHours}h</span></div>
+    <div class="progress-track"><div class="progress-fill" style="width:${goalPct}%;"></div></div>
+  </div>
+  `;
+}
+function iconCheckMini(){ return `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12l5 5 9-9"/></svg>`; }
+function priorityBg(p){ return {urgent:'var(--danger-soft)',high:'var(--amber-soft)',medium:'var(--rose-soft)',low:'var(--sage-soft)'}[p]||'var(--sage-soft)'; }
+function priorityFg(p){ return {urgent:'var(--danger)',high:'var(--amber)',medium:'var(--rose)',low:'var(--sage)'}[p]||'var(--sage)'; }
+
+function renderDayTimeline(blocks){
+  if(!blocks.length) return '';
+  const minH = Math.min(...blocks.map(b=>parseInt(b.start)));
+  const maxH = Math.max(...blocks.map(b=>parseInt(b.end.split(':')[0])+1));
+  const startHour = Math.max(0, minH-1), endHour = Math.min(24, maxH+1);
+  const pxPerHour = 64;
+  let html = `<div class="timeline" style="height:${(endHour-startHour)*pxPerHour}px;">`;
+  for(let h=startHour; h<endHour; h++){
+    html += `<div class="tl-hour"><span class="lbl">${String(h).padStart(2,'0')}:00</span></div>`;
+  }
+  blocks.forEach(b=>{
+    const top = timeToY(b.start,pxPerHour) - startHour*pxPerHour;
+    const height = Math.max(30, minutesBetween(b.start,b.end)/60*pxPerHour - 4);
+    const cls = b.courseId? courseColor(b.courseId) : 'course-4';
+    const title = b.kind==='event'? b.title : courseName(b.courseId);
+    html += `<div class="tl-block" style="top:${top}px;height:${height}px;background:var(--${cls}-soft);border-color:var(--${cls});color:var(--ink);" onclick="handleBlockClick('${b.kind}','${b.id}')">
+      <div class="tb-name">${escapeHtml(title)}</div>
+      <div class="tb-meta">${b.start}–${b.end}${b.room? ' · '+escapeHtml(b.room):''}${b.type? ' · '+b.type:''}</div>
+    </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+function handleBlockClick(kind,id){
+  if(kind==='class'){ /* find course */ const c=DATA.courses.find(c=>(c.schedule||[]).some(s=>s.id===id)); if(c) openClassModal(c.id, id); }
+  else if(kind==='exam'){ openExamModal(id); }
+  else if(kind==='session'){ openSessionModal(id); }
+  else if(kind==='event'){ openEventModal(id); }
+}
+function toggleTaskDone(id){
+  const t = DATA.tasks.find(t=>t.id===id);
+  if(!t) return;
+  t.status = t.status==='completed'? 'not_started' : 'completed';
+  t.completedAt = t.status==='completed'? todayISO() : null;
+  scheduleSave(); render();
+  if(t.status==='completed') toast('Marked as done ✓');
+}
+
+/* ===================== MODALS (generic) ===================== */
+function openModal(title, bodyHtml, opts={}){
+  closeModal();
+  const wrap = document.createElement('div');
+  wrap.className='modal-backdrop';
+  wrap.id='active-modal';
+  wrap.onclick = (e)=>{ if(e.target===wrap) closeModal(); };
+  wrap.innerHTML = `<div class="modal ${opts.wide?'wide':''}">
+    <div class="modal-head"><h3 class="serif">${title}</h3><button class="close-x" onclick="closeModal()">${iconX()}</button></div>
+    <div id="modal-body">${bodyHtml}</div>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+function closeModal(){ const m=document.getElementById('active-modal'); if(m) m.remove(); }
+
+/* ===================== SEARCH PALETTE ===================== */
+function openSearch(){
+  closeModal();
+  const wrap=document.createElement('div');
+  wrap.className='modal-backdrop'; wrap.id='active-modal';
+  wrap.onclick=(e)=>{ if(e.target===wrap) closeModal(); };
+  wrap.innerHTML = `<div class="palette">
+    <input class="palette-input" id="search-input" placeholder="Search courses, tasks, notes, exams…" autofocus>
+    <div class="palette-results" id="search-results"></div>
+  </div>`;
+  document.body.appendChild(wrap);
+  const input = document.getElementById('search-input');
+  input.addEventListener('input', ()=>renderSearchResults(input.value));
+  renderSearchResults('');
+  setTimeout(()=>input.focus(),30);
+}
+function renderSearchResults(q){
+  q=q.trim().toLowerCase();
+  const results=[];
+  DATA.courses.forEach(c=>{ if(!q||c.name.toLowerCase().includes(q)) results.push({label:c.name, kind:'Course', action:()=>{closeModal();navigate('course_detail',c.id);}}); });
+  DATA.tasks.forEach(t=>{ if(!q||t.title.toLowerCase().includes(q)) results.push({label:t.title, kind:'Task', action:()=>{closeModal();navigate('tasks');}}); });
+  DATA.exams.forEach(e=>{ const label=courseName(e.courseId)+' exam'; if(!q||label.toLowerCase().includes(q)) results.push({label, kind:'Exam', action:()=>{closeModal();navigate('exams');}}); });
+  DATA.notes.forEach(n=>{ if(!q||n.title.toLowerCase().includes(q)) results.push({label:n.title, kind:'Note', action:()=>{closeModal();navigate('notes',n.id);}}); });
+  DATA.events.forEach(ev=>{ if(!q||ev.title.toLowerCase().includes(q)) results.push({label:ev.title, kind:'Event', action:()=>{closeModal();navigate('calendar');}}); });
+  const box=document.getElementById('search-results');
+  if(!results.length){ box.innerHTML = `<div class="empty"><div class="emoji">🔍</div><div class="t">No results</div><div class="s">Try another search term.</div></div>`; return; }
+  box.innerHTML = results.slice(0,30).map((r,i)=>`<div class="pr-item" data-i="${i}">${escapeHtml(r.label)}<span class="pr-kind">${r.kind}</span></div>`).join('');
+  box.querySelectorAll('.pr-item').forEach((el,i)=> el.onclick = results[i].action);
+}
+
+/* ===================== COURSES ===================== */
+function renderCourses(){
+  return `
+  <div class="page-head">
+    <div><h1 class="page-title">Courses</h1><div class="page-sub">${DATA.courses.length} course${DATA.courses.length!==1?'s':''} this semester</div></div>
+    <button class="btn" onclick="openCourseModal()">${iconPlus()} Add course</button>
+  </div>
+  ${DATA.courses.length? `<div class="course-list">${DATA.courses.map(c=>renderCourseCard(c)).join('')}</div>` :
+    `<div class="empty card"><div class="emoji">📚</div><div class="t">No courses yet</div><div class="s">Add your first course to start building your dashboard.</div><button class="btn" style="margin-top:14px;" onclick="openCourseModal()">${iconPlus()} Add course</button></div>`}
+  `;
+}
+function renderCourseCard(c){
+  const cls = c.colorClass || courseColor(c.id);
+  const tasksOpen = DATA.tasks.filter(t=>t.courseId===c.id && t.status!=='completed').length;
+  const nextExam = DATA.exams.filter(e=>e.courseId===c.id).sort((a,b)=>a.date.localeCompare(b.date))[0];
+  const avg = courseAverage(c.id);
+  return `<div class="course-card" onclick="navigate('course_detail','${c.id}')">
+    <div class="accent-bar" style="background:var(--${cls});"></div>
+    <div style="margin-top:6px;font-family:'Fraunces',serif;font-weight:600;font-size:16.5px;">${escapeHtml(c.name)}</div>
+    <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">${escapeHtml(c.code||'')} ${c.professor? '· '+escapeHtml(c.professor):''}</div>
+    <hr class="soft">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);">
+      <span>${tasksOpen} open task${tasksOpen!==1?'s':''}</span>
+      <span>${avg!==null? avg.toFixed(1)+'/20' : '—'}</span>
+    </div>
+    ${nextExam? `<div style="margin-top:8px;font-size:11.5px;font-weight:600;color:var(--${cls});">Exam in ${Math.ceil(daysUntil(nextExam.date,nextExam.time))} days</div>`:''}
+  </div>`;
+}
+function courseAverage(courseId){
+  const items = DATA.grades[courseId];
+  if(!items || !items.length) return null;
+  let sw=0, sg=0;
+  items.forEach(it=>{ const w=parseFloat(it.coefficient)||1; sw+=w; sg+= (parseFloat(it.grade)||0)*w; });
+  return sw? sg/sw : null;
+}
+function openCourseModal(id){
+  const c = id? courseById(id) : null;
+  const body = `
+    <div class="field"><label class="field-label">Course name</label><input type="text" id="cf-name" value="${c? escapeHtml(c.name):''}" placeholder="e.g. Droit constitutionnel"></div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Course code</label><input type="text" id="cf-code" value="${c? escapeHtml(c.code||''):''}" placeholder="e.g. DR101"></div>
+      <div class="field"><label class="field-label">Professor</label><input type="text" id="cf-prof" value="${c? escapeHtml(c.professor||''):''}" placeholder="Prof. name"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Semester</label><input type="text" id="cf-sem" value="${c? escapeHtml(c.semester||''):''}" placeholder="Semester 1"></div>
+      <div class="field"><label class="field-label">Credits / ECTS</label><input type="number" id="cf-credits" value="${c? c.credits||'':''}" placeholder="6"></div>
+    </div>
+    <div class="field"><label class="field-label">Color</label>
+      <div class="chip-select" id="cf-color">${COURSE_COLORS.map(cc=>`<div class="chip-opt" data-v="${cc}" style="background:var(--${cc}-soft);border-color:var(--${cc});${((c&&c.colorClass)||COURSE_COLORS[0])===cc?'outline:2px solid var('+"--"+cc+');':''}"><span class="dot" style="background:var(--${cc});display:inline-block;"></span></div>`).join('')}</div>
+    </div>
+    <div class="modal-actions">
+      ${c? `<button class="btn danger" onclick="deleteCourse('${c.id}')">${iconTrash()} Delete</button>`:'<span></span>'}
+      <div style="display:flex;gap:10px;"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveCourse('${c?c.id:''}')">Save course</button></div>
+    </div>
+  `;
+  openModal(c? 'Edit course':'Add course', body);
+  let chosenColor = (c&&c.colorClass) || COURSE_COLORS[DATA.courses.length%COURSE_COLORS.length];
+  const paintSwatches = ()=>{
+    document.getElementById('cf-color').querySelectorAll('.chip-opt').forEach(el=>{
+      el.style.boxShadow = el.dataset.v===chosenColor ? '0 0 0 2px var(--ink)' : 'none';
+    });
+  };
+  paintSwatches();
+  document.getElementById('cf-color').querySelectorAll('.chip-opt').forEach(el=>{
+    el.onclick=()=>{ chosenColor=el.dataset.v; paintSwatches(); };
+  });
+  window.__pendingColor = ()=>chosenColor;
+}
+function saveCourse(id){
+  const name=document.getElementById('cf-name').value.trim();
+  if(!name){ toast('Give the course a name'); return; }
+  const payload = {
+    name, code:document.getElementById('cf-code').value.trim(), professor:document.getElementById('cf-prof').value.trim(),
+    semester:document.getElementById('cf-sem').value.trim(), credits:document.getElementById('cf-credits').value,
+    colorClass: window.__pendingColor ? window.__pendingColor() : COURSE_COLORS[0]
+  };
+  if(id){ Object.assign(courseById(id), payload); toast('Course updated'); }
+  else { DATA.courses.push(Object.assign({id:uid(), schedule:[]}, payload)); toast('Course added'); }
+  scheduleSave(); closeModal(); render();
+}
+function deleteCourse(id){
+  if(!confirm('Delete this course and all related data reference? Tasks/notes/exams referencing it will remain but show as unassigned.')) return;
+  DATA.courses = DATA.courses.filter(c=>c.id!==id);
+  scheduleSave(); closeModal(); navigate('courses');
+}
+
+/* ===================== COURSE DETAIL ===================== */
+let COURSE_TAB = 'overview';
+let LAST_COURSE_ID = null;
+function renderCourseDetail(id){
+  if(id !== LAST_COURSE_ID){ COURSE_TAB='overview'; LAST_COURSE_ID=id; }
+  const c = courseById(id);
+  if(!c) return `<div class="empty card"><div class="t">Course not found</div><button class="btn" onclick="navigate('courses')">Back to courses</button></div>`;
+  const cls = c.colorClass || courseColor(c.id);
+  const tabs = ['overview','notes','tasks','exams','resources','statistics'];
+  return `
+  <div class="page-head">
+    <div>
+      <button class="btn ghost" onclick="navigate('courses')" style="padding-left:0;margin-bottom:6px;">← All courses</button>
+      <h1 class="page-title"><span class="dot" style="background:var(--${cls});display:inline-block;margin-right:8px;"></span>${escapeHtml(c.name)}</h1>
+      <div class="page-sub">${escapeHtml(c.code||'')} ${c.professor?'· '+escapeHtml(c.professor):''} ${c.credits?'· '+c.credits+' ECTS':''}</div>
+    </div>
+    <button class="btn secondary" onclick="openCourseModal('${c.id}')">${iconEdit()} Edit course</button>
+  </div>
+  <div class="tabbar">${tabs.map(t=>`<button class="tabbtn ${COURSE_TAB===t?'active':''}" onclick="COURSE_TAB='${t}';render();">${t.charAt(0).toUpperCase()+t.slice(1)}</button>`).join('')}</div>
+  ${renderCourseTab(c, COURSE_TAB)}
+  `;
+}
+function renderCourseTab(c, tab){
+  if(tab==='overview'){
+    const nextTask = DATA.tasks.filter(t=>t.courseId===c.id && t.status!=='completed').sort((a,b)=>a.deadline.localeCompare(b.deadline))[0];
+    const nextClass = nextScheduledClass(c);
+    const avg = courseAverage(c.id);
+    const mins = DATA.sessions.filter(s=>s.courseId===c.id && s.completed).reduce((a,b)=>a+b.duration,0);
+    return `<div class="grid g4">
+      <div class="card"><div class="page-sub">Next class</div><div style="font-weight:600;margin-top:6px;">${nextClass? DAY_NAMES[nextClass.day]+' '+nextClass.start : 'None scheduled'}</div></div>
+      <div class="card"><div class="page-sub">Next task</div><div style="font-weight:600;margin-top:6px;">${nextTask? escapeHtml(nextTask.title):'None'}</div></div>
+      <div class="card"><div class="page-sub">Current average</div><div style="font-weight:600;margin-top:6px;">${avg!==null? avg.toFixed(1)+'/20':'No grades yet'}</div></div>
+      <div class="card"><div class="page-sub">Total study time</div><div style="font-weight:600;margin-top:6px;">${fmtHM(mins)}</div></div>
+    </div>
+    <div class="card" style="margin-top:18px;">
+      <div class="card-title">Weekly class schedule</div>
+      ${(c.schedule||[]).length? c.schedule.map(s=>`<div class="deadline-row"><span class="dot" style="background:var(--${c.colorClass||courseColor(c.id)});"></span><div style="flex:1;">${DAY_NAMES_FULL[s.day]} · ${s.start}–${s.end} ${s.room?'· '+escapeHtml(s.room):''} ${s.type?'· '+s.type:''}</div><button class="btn ghost" onclick="openClassModal('${c.id}','${s.id}')">${iconEdit()}</button></div>`).join('') :
+      `<div class="empty"><div class="emoji">🗓️</div><div class="t">No classes scheduled</div><div class="s">Add this course's weekly meeting times from the Calendar page.</div></div>`}
+      <button class="btn secondary" style="margin-top:10px;" onclick="openClassModal('${c.id}')">${iconPlus()} Add class time</button>
+    </div>`;
+  }
+  if(tab==='notes'){
+    const notes = DATA.notes.filter(n=>n.courseId===c.id);
+    return notes.length? `<div class="grid g3">${notes.map(n=>renderNoteCard(n)).join('')}</div>` : emptyBlock('📝','No notes yet','Create your first note for this course.', `<button class="btn" onclick="openNoteModal(null,'${c.id}')">${iconPlus()} New note</button>`);
+  }
+  if(tab==='tasks'){
+    const tasks = DATA.tasks.filter(t=>t.courseId===c.id);
+    return tasks.length? renderTaskListBlock(tasks) : emptyBlock('✅','No tasks yet','Add assignments or readings for this course.', `<button class="btn" onclick="openTaskModal(null,'${c.id}')">${iconPlus()} Add task</button>`);
+  }
+  if(tab==='exams'){
+    const exams = DATA.exams.filter(e=>e.courseId===c.id);
+    return exams.length? exams.map(e=>renderExamRow(e)).join('') : emptyBlock('🎓','No exams yet',"Log this course's exam dates for a live countdown.", `<button class="btn" onclick="openExamModal(null,'${c.id}')">${iconPlus()} Add exam</button>`);
+  }
+  if(tab==='resources'){
+    const resources = c.resources || [];
+    return `<div class="card">
+      <div class="card-title">Links & resources</div>
+      ${resources.length? resources.map((r,i)=>`<div class="deadline-row"><span>🔗</span><a href="${escapeHtml(r.url)}" target="_blank" style="flex:1;font-weight:600;font-size:13.5px;">${escapeHtml(r.label||r.url)}</a><button class="btn ghost" onclick="removeResource('${c.id}',${i})">${iconTrash()}</button></div>`).join('') : `<div class="empty"><div class="emoji">🔗</div><div class="t">No resources yet</div><div class="s">Add links to slides, readings, or course pages.</div></div>`}
+      <div class="field-row" style="margin-top:12px;">
+        <input type="text" id="res-label" placeholder="Label (e.g. Lecture slides)">
+        <input type="text" id="res-url" placeholder="https://…">
+      </div>
+      <button class="btn secondary" onclick="addResource('${c.id}')">${iconPlus()} Add link</button>
+    </div>`;
+  }
+  if(tab==='statistics'){
+    const sessions = DATA.sessions.filter(s=>s.courseId===c.id && s.completed);
+    const totalMins = sessions.reduce((a,b)=>a+b.duration,0);
+    const avg = courseAverage(c.id);
+    return `<div class="grid g3">
+      <div class="card"><div class="page-sub">Total study sessions</div><div class="serif" style="font-size:24px;font-weight:600;">${sessions.length}</div></div>
+      <div class="card"><div class="page-sub">Total time studied</div><div class="serif" style="font-size:24px;font-weight:600;">${fmtHM(totalMins)}</div></div>
+      <div class="card"><div class="page-sub">Course average</div><div class="serif" style="font-size:24px;font-weight:600;">${avg!==null? avg.toFixed(1)+'/20':'—'}</div></div>
+    </div>`;
+  }
+  return '';
+}
+function nextScheduledClass(c){
+  const now=new Date(); const dow=now.getDay();
+  const sched = (c.schedule||[]).slice().sort((a,b)=>{
+    const da = (a.day-dow+7)%7, db=(b.day-dow+7)%7;
+    if(da!==db) return da-db; return a.start.localeCompare(b.start);
+  });
+  return sched[0];
+}
+function emptyBlock(emoji,title,sub,cta){ return `<div class="empty card"><div class="emoji">${emoji}</div><div class="t">${title}</div><div class="s">${sub}</div>${cta?`<div style="margin-top:14px;">${cta}</div>`:''}</div>`; }
+function addResource(courseId){
+  const label=document.getElementById('res-label').value.trim(); const url=document.getElementById('res-url').value.trim();
+  if(!url){ toast('Add a URL'); return; }
+  const c=courseById(courseId); c.resources=c.resources||[]; c.resources.push({label,url});
+  scheduleSave(); render();
+}
+function removeResource(courseId,i){ const c=courseById(courseId); c.resources.splice(i,1); scheduleSave(); render(); }
+
+/* ===================== CLASS SCHEDULE MODAL ===================== */
+function openClassModal(courseId, schedId){
+  const c = courseById(courseId);
+  const sch = schedId? c.schedule.find(s=>s.id===schedId) : null;
+  const body = `
+    <div class="field"><label class="field-label">Day of week</label>
+      <select id="sc-day">${DAY_NAMES_FULL.map((d,i)=>`<option value="${i}" ${sch&&sch.day===i?'selected':''}>${d}</option>`).join('')}</select>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Start time</label><input type="time" id="sc-start" value="${sch?sch.start:'09:00'}"></div>
+      <div class="field"><label class="field-label">End time</label><input type="time" id="sc-end" value="${sch?sch.end:'10:00'}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Room</label><input type="text" id="sc-room" value="${sch?escapeHtml(sch.room||''):''}" placeholder="Amphi A"></div>
+      <div class="field"><label class="field-label">Type</label><select id="sc-type">${['CM','TD','TP'].map(t=>`<option ${sch&&sch.type===t?'selected':''}>${t}</option>`).join('')}</select></div>
+    </div>
+    <div class="modal-actions">
+      ${sch? `<button class="btn danger" onclick="deleteClassSlot('${courseId}','${schedId}')">${iconTrash()} Remove</button>`:'<span></span>'}
+      <div style="display:flex;gap:10px;"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveClassSlot('${courseId}','${schedId||''}')">Save</button></div>
+    </div>
+  `;
+  openModal(sch? 'Edit class time':'Add class time', body);
+}
+function saveClassSlot(courseId, schedId){
+  const c=courseById(courseId);
+  const payload = { day:parseInt(document.getElementById('sc-day').value), start:document.getElementById('sc-start').value, end:document.getElementById('sc-end').value, room:document.getElementById('sc-room').value.trim(), type:document.getElementById('sc-type').value };
+  if(payload.end<=payload.start){ toast('End time must be after start time'); return; }
+  c.schedule = c.schedule||[];
+  if(schedId){ Object.assign(c.schedule.find(s=>s.id===schedId), payload); }
+  else c.schedule.push(Object.assign({id:uid()}, payload));
+  scheduleSave(); closeModal(); render(); toast('Class saved');
+}
+function deleteClassSlot(courseId, schedId){
+  const c=courseById(courseId); c.schedule=c.schedule.filter(s=>s.id!==schedId);
+  scheduleSave(); closeModal(); render();
+}
+
+/* ===================== TASKS ===================== */
+let TASK_VIEW='all', TASK_SORT='deadline';
+function renderTasks(){
+  const now=new Date();
+  let list = DATA.tasks.slice();
+  if(TASK_VIEW==='today') list=list.filter(t=>t.deadline===todayISO());
+  else if(TASK_VIEW==='week'){ const we=addDays(now,7); list=list.filter(t=>{const d=parseISO(t.deadline); return d>=now && d<=we;}); }
+  else if(TASK_VIEW==='upcoming') list=list.filter(t=>parseISO(t.deadline)>=now && t.status!=='completed');
+  else if(TASK_VIEW==='completed') list=list.filter(t=>t.status==='completed');
+  if(TASK_SORT==='deadline') list.sort((a,b)=>a.deadline.localeCompare(b.deadline));
+  else if(TASK_SORT==='priority'){ const order={urgent:0,high:1,medium:2,low:3}; list.sort((a,b)=>order[a.priority]-order[b.priority]); }
+  else if(TASK_SORT==='course') list.sort((a,b)=>courseName(a.courseId).localeCompare(courseName(b.courseId)));
+
+  const tabs=[['all','All'],['today','Today'],['week','This week'],['upcoming','Upcoming'],['completed','Completed']];
+  return `
+  <div class="page-head">
+    <div><h1 class="page-title">Tasks</h1><div class="page-sub">${DATA.tasks.filter(t=>t.status!=='completed').length} open</div></div>
+    <button class="btn" onclick="openTaskModal()">${iconPlus()} Add task</button>
+  </div>
+  <div class="tabbar">${tabs.map(([k,l])=>`<button class="tabbtn ${TASK_VIEW===k?'active':''}" onclick="TASK_VIEW='${k}';render();">${l}</button>`).join('')}</div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+    <select style="width:auto;" onchange="TASK_SORT=this.value;render();">
+      <option value="deadline" ${TASK_SORT==='deadline'?'selected':''}>Sort: Deadline</option>
+      <option value="priority" ${TASK_SORT==='priority'?'selected':''}>Sort: Priority</option>
+      <option value="course" ${TASK_SORT==='course'?'selected':''}>Sort: Course</option>
+    </select>
+  </div>
+  ${list.length? renderTaskListBlock(list) : emptyBlock('✅','No tasks here','Nothing in this view yet.')}
+  `;
+}
+function renderTaskListBlock(list){
+  return `<div class="card">${list.map(t=>`
+    <div class="task-row" draggable="true" data-id="${t.id}">
+      <button class="check-circle ${t.status==='completed'?'done':''}" onclick="toggleTaskDone('${t.id}')">${t.status==='completed'?iconCheckMini():''}</button>
+      <div style="flex:1;min-width:0;cursor:pointer;" onclick="openTaskModal('${t.id}')">
+        <div style="font-weight:600;font-size:13.5px;${t.status==='completed'?'text-decoration:line-through;color:var(--ink-soft);':''}">${escapeHtml(t.title)}</div>
+        <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">${escapeHtml(courseName(t.courseId))} · Due ${fmtDateHuman(t.deadline)} ${t.estTime? '· ~'+t.estTime+'m':''}</div>
+        ${t.tags&&t.tags.length? `<div style="margin-top:5px;display:flex;gap:5px;flex-wrap:wrap;">${t.tags.map(tag=>`<span class="tag" style="background:var(--sage-soft);color:var(--sage);">${escapeHtml(tag)}</span>`).join('')}</div>`:''}
+      </div>
+      <span class="priority-pill" style="background:${priorityBg(t.priority)};color:${priorityFg(t.priority)};">${t.priority}</span>
+    </div>`).join('')}</div>`;
+}
+function openTaskModal(id, presetCourse){
+  const t = id? DATA.tasks.find(x=>x.id===id) : null;
+  const body = `
+    <div class="field"><label class="field-label">Title</label><input type="text" id="tf-title" value="${t?escapeHtml(t.title):''}" placeholder="e.g. Commentaire d'arrêt"></div>
+    <div class="field"><label class="field-label">Course</label><select id="tf-course"><option value="">— None —</option>${DATA.courses.map(c=>`<option value="${c.id}" ${((t&&t.courseId)||presetCourse)===c.id?'selected':''}>${escapeHtml(c.name)}</option>`).join('')}</select></div>
+    <div class="field"><label class="field-label">Description</label><textarea id="tf-desc" rows="2" placeholder="Optional details">${t?escapeHtml(t.description||''):''}</textarea></div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Deadline</label><input type="date" id="tf-deadline" value="${t?t.deadline:todayISO()}"></div>
+      <div class="field"><label class="field-label">Est. time (min)</label><input type="number" id="tf-est" value="${t?t.estTime||'':''}" placeholder="60"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Priority</label><select id="tf-priority">${['low','medium','high','urgent'].map(p=>`<option value="${p}" ${t&&t.priority===p?'selected':''}>${p.charAt(0).toUpperCase()+p.slice(1)}</option>`).join('')}</select></div>
+      <div class="field"><label class="field-label">Status</label><select id="tf-status">${['not_started','in_progress','completed'].map(s=>`<option value="${s}" ${t&&t.status===s?'selected':''}>${s.replace('_',' ')}</option>`).join('')}</select></div>
+    </div>
+    <div class="field"><label class="field-label">Tags (comma separated)</label><input type="text" id="tf-tags" value="${t&&t.tags?escapeHtml(t.tags.join(', ')):''}" placeholder="reading, group work"></div>
+    <div class="modal-actions">
+      ${t? `<button class="btn danger" onclick="deleteTask('${t.id}')">${iconTrash()} Delete</button>`:'<span></span>'}
+      <div style="display:flex;gap:10px;"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveTask('${t?t.id:''}')">Save task</button></div>
+    </div>
+  `;
+  openModal(t?'Edit task':'Add task', body);
+}
+function saveTask(id){
+  const title=document.getElementById('tf-title').value.trim();
+  if(!title){ toast('Give the task a title'); return; }
+  const payload = {
+    title, courseId:document.getElementById('tf-course').value||null, description:document.getElementById('tf-desc').value.trim(),
+    deadline:document.getElementById('tf-deadline').value, estTime:document.getElementById('tf-est').value,
+    priority:document.getElementById('tf-priority').value, status:document.getElementById('tf-status').value,
+    tags: document.getElementById('tf-tags').value.split(',').map(s=>s.trim()).filter(Boolean)
+  };
+  if(id){ const t=DATA.tasks.find(x=>x.id===id); Object.assign(t,payload); if(t.status==='completed' && !t.completedAt) t.completedAt=todayISO(); }
+  else DATA.tasks.push(Object.assign({id:uid(), completedAt:null}, payload));
+  scheduleSave(); closeModal(); render(); toast('Task saved');
+}
+function deleteTask(id){ DATA.tasks=DATA.tasks.filter(t=>t.id!==id); scheduleSave(); closeModal(); render(); }
+
+/* ===================== EXAMS ===================== */
+function renderExams(){
+  const sorted = DATA.exams.slice().sort((a,b)=>(a.date+ (a.time||'')).localeCompare(b.date+(b.time||'')));
+  const soon = sorted.filter(e=>{const d=daysUntil(e.date,e.time); return d>=0 && d<=21;});
+  return `
+  <div class="page-head">
+    <div><h1 class="page-title">Exams</h1><div class="page-sub">${sorted.length} logged</div></div>
+    <button class="btn" onclick="openExamModal()">${iconPlus()} Add exam</button>
+  </div>
+  ${soon.length>=2? `<div class="attn-banner plain-ink" style="background:var(--rose-soft);color:var(--plum);">🎓 Exam season: ${soon.length} exams in the next 3 weeks. The soonest is in ${Math.ceil(Math.min(...soon.map(e=>daysUntil(e.date,e.time))))} days.</div>`:''}
+  ${sorted.length? sorted.map(e=>renderExamRow(e)).join('') : emptyBlock('✨','No upcoming exams','Log an exam to get a live countdown.', `<button class="btn" onclick="openExamModal()">${iconPlus()} Add exam</button>`)}
+  `;
+}
+function renderExamRow(e){
+  const cls=courseColor(e.courseId);
+  const d=daysUntil(e.date,e.time);
+  const label = d<0? 'Passed' : Math.ceil(d)+' days remaining';
+  return `<div class="card" style="margin-bottom:12px;display:flex;align-items:center;gap:16px;">
+    <div style="width:6px;align-self:stretch;border-radius:4px;background:var(--${cls});"></div>
+    <div style="flex:1;cursor:pointer;" onclick="openExamModal('${e.id}')">
+      <div style="font-family:'Fraunces',serif;font-weight:600;font-size:16px;">${escapeHtml(courseName(e.courseId))}</div>
+      <div style="font-size:12.5px;color:var(--ink-soft);margin-top:2px;">${fmtDateHuman(e.date)}${e.time? ' · '+e.time:''} ${e.location? '· '+escapeHtml(e.location):''} ${e.type? '· '+escapeHtml(e.type):''}</div>
+    </div>
+    <span class="countdown-badge" style="background:var(--${cls}-soft);color:var(--${cls});">${label}</span>
+  </div>`;
+}
+function openExamModal(id, presetCourse){
+  const e = id? DATA.exams.find(x=>x.id===id) : null;
+  const body = `
+    <div class="field"><label class="field-label">Course</label><select id="ef-course">${DATA.courses.map(c=>`<option value="${c.id}" ${((e&&e.courseId)||presetCourse)===c.id?'selected':''}>${escapeHtml(c.name)}</option>`).join('')}</select></div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Date</label><input type="date" id="ef-date" value="${e?e.date:todayISO()}"></div>
+      <div class="field"><label class="field-label">Time</label><input type="time" id="ef-time" value="${e?e.time||'09:00':'09:00'}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Location</label><input type="text" id="ef-loc" value="${e?escapeHtml(e.location||''):''}" placeholder="Amphi A"></div>
+      <div class="field"><label class="field-label">Exam type</label><input type="text" id="ef-type" value="${e?escapeHtml(e.type||''):''}" placeholder="Midterm, Final…"></div>
+    </div>
+    <div class="field"><label class="field-label">Notes</label><textarea id="ef-notes" rows="2">${e?escapeHtml(e.notes||''):''}</textarea></div>
+    <div class="modal-actions">
+      ${e? `<button class="btn danger" onclick="deleteExam('${e.id}')">${iconTrash()} Delete</button>`:'<span></span>'}
+      <div style="display:flex;gap:10px;"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveExam('${e?e.id:''}')">Save exam</button></div>
+    </div>
+  `;
+  if(!DATA.courses.length){ openModal('Add exam', emptyBlock('📚','Add a course first','Exams need to belong to a course.', `<button class="btn" onclick="closeModal();openCourseModal();">${iconPlus()} Add course</button>`)); return; }
+  openModal(e?'Edit exam':'Add exam', body);
+}
+function saveExam(id){
+  const payload = { courseId:document.getElementById('ef-course').value, date:document.getElementById('ef-date').value, time:document.getElementById('ef-time').value, location:document.getElementById('ef-loc').value.trim(), type:document.getElementById('ef-type').value.trim(), notes:document.getElementById('ef-notes').value.trim() };
+  if(id){ Object.assign(DATA.exams.find(e=>e.id===id), payload); }
+  else DATA.exams.push(Object.assign({id:uid()}, payload));
+  scheduleSave(); closeModal(); render(); toast('Exam saved');
+}
+function deleteExam(id){ DATA.exams=DATA.exams.filter(e=>e.id!==id); scheduleSave(); closeModal(); render(); }
+
+/* ===================== CALENDAR ===================== */
+let CAL_VIEW='week';
+let CAL_ANCHOR = new Date();
+function renderCalendarView(){
+  return `
+  <div class="page-head">
+    <div><h1 class="page-title">Calendar</h1><div class="page-sub">${CAL_VIEW==='week'? weekRangeLabel(CAL_ANCHOR) : CAL_VIEW==='month'? fmtMonthYear(CAL_ANCHOR) : CAL_ANCHOR.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})}</div></div>
+    <button class="btn" onclick="openEventModal()">${iconPlus()} Add event</button>
+  </div>
+  <div class="cal-toolbar">
+    <div class="viewswitch">
+      ${['day','week','month'].map(v=>`<button class="${CAL_VIEW===v?'active':''}" onclick="CAL_VIEW='${v}';render();">${v.charAt(0).toUpperCase()+v.slice(1)}</button>`).join('')}
+    </div>
+    <button class="btn ghost" onclick="calStep(-1)">‹ Prev</button>
+    <button class="btn ghost" onclick="CAL_ANCHOR=new Date();render();">Today</button>
+    <button class="btn ghost" onclick="calStep(1)">Next ›</button>
+    <select id="cal-course-filter" style="width:auto;margin-left:auto;" onchange="render();"><option value="">All courses</option>${DATA.courses.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')}</select>
+  </div>
+  ${CAL_VIEW==='week'? renderWeekGrid() : CAL_VIEW==='month'? renderMonthGrid() : renderDayView()}
+  `;
+}
+function calStep(dir){
+  if(CAL_VIEW==='week') CAL_ANCHOR=addDays(CAL_ANCHOR,7*dir);
+  else if(CAL_VIEW==='day') CAL_ANCHOR=addDays(CAL_ANCHOR,1*dir);
+  else CAL_ANCHOR=new Date(CAL_ANCHOR.getFullYear(), CAL_ANCHOR.getMonth()+dir, 1);
+  render();
+}
+function weekRangeLabel(d){ const s=startOfWeek(d), e=addDays(s,6); return s.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' – '+e.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }
+function activeCourseFilter(){ const el=document.getElementById('cal-course-filter'); return el? el.value : ''; }
+
+function renderWeekGrid(){
+  const weekStart = startOfWeek(CAL_ANCHOR);
+  const days = Array.from({length:7}).map((_,i)=>addDays(weekStart,i));
+  const pxPerHour=52, startHour=7, endHour=21;
+  const filter = activeCourseFilter();
+  let head = `<div class="week-corner"></div>` + days.map(d=>`<div class="week-head ${isoDate(d)===todayISO()?'today':''}">${DAY_NAMES[d.getDay()]}<span class="d">${d.getDate()}</span></div>`).join('');
+  let hourLabels = `<div class="hourlabels">${Array.from({length:endHour-startHour}).map((_,i)=>`<div class="hl">${String(startHour+i).padStart(2,'0')}:00</div>`).join('')}</div>`;
+  let cols = days.map(d=>{
+    let blocks = scheduleForDate(d);
+    if(filter) blocks = blocks.filter(b=>b.courseId===filter);
+    let inner = Array.from({length:endHour-startHour}).map(()=>`<div class="week-hourline"></div>`).join('');
+    blocks.forEach(b=>{
+      const top = timeToY(b.start,pxPerHour) - startHour*pxPerHour;
+      const height = Math.max(24, minutesBetween(b.start,b.end)/60*pxPerHour - 2);
+      if(top<0 || top>(endHour-startHour)*pxPerHour) return;
+      const cls = b.courseId? courseColor(b.courseId) : 'course-4';
+      const title = b.kind==='event'? b.title : courseName(b.courseId);
+      inner += `<div class="ev-block" draggable="${b.kind==='class'?'true':'false'}" data-kind="${b.kind}" data-id="${b.id}" data-day="${d.getDay()}"
+        style="top:${top}px;height:${height}px;background:var(--${cls}-soft);border-color:var(--${cls});color:var(--ink);"
+        onclick="handleBlockClick('${b.kind}','${b.id}')"><b>${escapeHtml(title)}</b>${b.start}–${b.end}</div>`;
+    });
+    return `<div class="week-col" data-day="${d.getDay()}" style="height:${(endHour-startHour)*pxPerHour}px;">${inner}</div>`;
+  }).join('');
+  return `<div class="week-grid">${head}${hourLabels}${cols}</div>
+  <p class="page-sub" style="margin-top:10px;">Tip: drag a class block onto another day to move it to a new weekday. Click any block to edit its time, room, or delete it.</p>`;
+}
+function bindCalendarHandlers(){
+  const cols = document.querySelectorAll('.week-col');
+  document.querySelectorAll('.ev-block[draggable="true"]').forEach(el=>{
+    el.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', JSON.stringify({id:el.dataset.id, kind:el.dataset.kind})); });
+  });
+  cols.forEach(col=>{
+    col.addEventListener('dragover', e=>e.preventDefault());
+    col.addEventListener('drop', e=>{
+      e.preventDefault();
+      try{
+        const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+        const newDay = parseInt(col.dataset.day);
+        if(data.kind==='class'){
+          const course = DATA.courses.find(c=>(c.schedule||[]).some(s=>s.id===data.id));
+          if(course){ const slot=course.schedule.find(s=>s.id===data.id); slot.day=newDay; scheduleSave(); render(); toast('Class moved to '+DAY_NAMES_FULL[newDay]); }
+        }
+      }catch(err){}
+    });
+  });
+}
+function renderMonthGrid(){
+  const y=CAL_ANCHOR.getFullYear(), m=CAL_ANCHOR.getMonth();
+  const first = new Date(y,m,1);
+  const gridStart = startOfWeek(first);
+  const filter = activeCourseFilter();
+  let cells=[];
+  for(let i=0;i<42;i++){
+    const d = addDays(gridStart,i);
+    const inMonth = d.getMonth()===m;
+    let blocks = scheduleForDate(d);
+    if(filter) blocks = blocks.filter(b=>b.courseId===filter);
+    cells.push(`<div class="month-cell ${inMonth?'':'other'} ${isoDate(d)===todayISO()?'today':''}">
+      <div class="num">${d.getDate()}</div>
+      ${blocks.slice(0,3).map(b=>{ const cls=b.courseId?courseColor(b.courseId):'course-4'; const title=b.kind==='event'?b.title:courseName(b.courseId); return `<div class="month-chip" style="background:var(--${cls}-soft);border-color:var(--${cls});color:var(--ink);" onclick="handleBlockClick('${b.kind}','${b.id}')">${escapeHtml(title)}</div>`; }).join('')}
+      ${blocks.length>3? `<div style="font-size:10px;color:var(--ink-soft);">+${blocks.length-3} more</div>`:''}
+    </div>`);
+  }
+  return `<div class="month-grid">
+    ${DAY_NAMES.map(d=>`<div class="week-head" style="border-left:none;">${d}</div>`).join('')}
+    ${cells.join('')}
+  </div>`;
+}
+function renderDayView(){
+  const blocks = scheduleForDate(CAL_ANCHOR);
+  const filter = activeCourseFilter();
+  const filtered = filter? blocks.filter(b=>b.courseId===filter) : blocks;
+  return `<div class="card">${filtered.length? renderDayTimeline(filtered) : emptyBlock('🌤️','Nothing scheduled','No classes, exams, sessions or events on this day.')}</div>`;
+}
+function openEventModal(id){
+  const ev = id? DATA.events.find(x=>x.id===id) : null;
+  const body = `
+    <div class="field"><label class="field-label">Title</label><input type="text" id="ev-title" value="${ev?escapeHtml(ev.title):''}" placeholder="e.g. Study group meetup"></div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Date</label><input type="date" id="ev-date" value="${ev?ev.date:todayISO()}"></div>
+      <div class="field"><label class="field-label">Start</label><input type="time" id="ev-start" value="${ev?ev.start:'14:00'}"></div>
+    </div>
+    <div class="field"><label class="field-label">End</label><input type="time" id="ev-end" value="${ev?ev.end:'15:00'}"></div>
+    <div class="field"><label class="field-label">Notes</label><textarea id="ev-notes" rows="2">${ev?escapeHtml(ev.notes||''):''}</textarea></div>
+    <div class="modal-actions">
+      ${ev? `<button class="btn danger" onclick="deleteEvent('${ev.id}')">${iconTrash()} Delete</button>`:'<span></span>'}
+      <div style="display:flex;gap:10px;"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveEvent('${ev?ev.id:''}')">Save event</button></div>
+    </div>
+  `;
+  openModal(ev?'Edit event':'Add event', body);
+}
+function saveEvent(id){
+  const payload = { title:document.getElementById('ev-title').value.trim()||'Untitled event', date:document.getElementById('ev-date').value, start:document.getElementById('ev-start').value, end:document.getElementById('ev-end').value, notes:document.getElementById('ev-notes').value.trim() };
+  if(id){ Object.assign(DATA.events.find(e=>e.id===id), payload); }
+  else DATA.events.push(Object.assign({id:uid()}, payload));
+  scheduleSave(); closeModal(); render(); toast('Event saved');
+}
+function deleteEvent(id){ DATA.events=DATA.events.filter(e=>e.id!==id); scheduleSave(); closeModal(); render(); }
+
+/* ===================== NOTES ===================== */
+let ACTIVE_NOTE = null;
+function renderNotes(){
+  if(ROUTE_PARAM){ ACTIVE_NOTE = ROUTE_PARAM; ROUTE_PARAM=null; }
+  const sorted = DATA.notes.slice().sort((a,b)=> (b.updatedAt||b.createdAt).localeCompare(a.updatedAt||a.createdAt));
+  if(!ACTIVE_NOTE && sorted.length) ACTIVE_NOTE = sorted[0].id;
+  const active = DATA.notes.find(n=>n.id===ACTIVE_NOTE);
+  return `
+  <div class="page-head">
+    <div><h1 class="page-title">Notes</h1><div class="page-sub">${DATA.notes.length} note${DATA.notes.length!==1?'s':''}</div></div>
+    <button class="btn" onclick="openNoteModal()">${iconPlus()} New note</button>
+  </div>
+  <div class="field" style="max-width:320px;"><input type="text" id="notes-search" placeholder="Search notes…" oninput="filterNotesList(this.value)"></div>
+  <div class="notes-layout">
+    <div class="card" id="notes-list-wrap" style="padding:10px;max-height:70vh;overflow:auto;">
+      ${sorted.length? sorted.map(n=>renderNoteListItem(n)).join('') : `<div class="empty"><div class="emoji">📝</div><div class="t">No notes yet</div><div class="s">Create your first note.</div></div>`}
+    </div>
+    <div class="card">
+      ${active? renderNoteEditor(active) : `<div class="empty"><div class="emoji">📝</div><div class="t">No notes yet</div><div class="s">Create your first note to get started.</div><button class="btn" style="margin-top:12px;" onclick="openNoteModal()">${iconPlus()} New note</button></div>`}
+    </div>
+  </div>
+  `;
+}
+function renderNoteListItem(n){
+  return `<div class="note-item ${ACTIVE_NOTE===n.id?'active':''}" onclick="ACTIVE_NOTE='${n.id}';render();">
+    <div class="nt">${escapeHtml(n.title||'Untitled')}</div>
+    <div class="np">${escapeHtml(courseName(n.courseId))} · ${fmtDateHuman((n.updatedAt||n.createdAt).slice(0,10))}</div>
+  </div>`;
+}
+function filterNotesList(q){
+  q=q.toLowerCase();
+  document.querySelectorAll('.note-item').forEach(el=>{
+    el.style.display = el.textContent.toLowerCase().includes(q)? '' : 'none';
+  });
+}
+function renderNoteEditor(n){
+  return `
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+    <input type="text" id="note-title-input" value="${escapeHtml(n.title||'')}" style="font-family:'Fraunces',serif;font-size:22px;font-weight:600;border:none;background:none;padding:2px 0;" oninput="updateNoteField('${n.id}','title',this.value)" placeholder="Untitled">
+    <button class="btn danger" onclick="deleteNote('${n.id}')">${iconTrash()}</button>
+  </div>
+  <select style="width:auto;margin:6px 0 14px 0;" onchange="updateNoteField('${n.id}','courseId',this.value)">
+    <option value="">— No course —</option>${DATA.courses.map(c=>`<option value="${c.id}" ${n.courseId===c.id?'selected':''}>${escapeHtml(c.name)}</option>`).join('')}
+  </select>
+  <div class="editor-toolbar">
+    <button class="etb-btn" onclick="execFmt('bold')"><i>B</i></button>
+    <button class="etb-btn" style="font-style:italic;" onclick="execFmt('italic')">i</button>
+    <button class="etb-btn" onclick="execFmt('formatBlock','H3')">H</button>
+    <button class="etb-btn" onclick="execFmt('insertUnorderedList')">•</button>
+    <button class="etb-btn" onclick="execFmt('insertOrderedList')">1.</button>
+    <button class="etb-btn" onclick="insertCheckbox()">☑</button>
+    <button class="etb-btn" onclick="execFmt('hiliteColor','#F3E1E8')">◆</button>
+    <button class="etb-btn" onclick="insertLink()">🔗</button>
+    <button class="etb-btn" onclick="execFmt('formatBlock','PRE')">⌘</button>
+  </div>
+  <div class="note-editor scrollbar-thin" id="note-editor" contenteditable="true" data-ph="Start writing…">${n.content||''}</div>
+  `;
+}
+function updateNoteField(id, field, val){
+  const n=DATA.notes.find(x=>x.id===id); if(!n) return;
+  n[field]=val; n.updatedAt=new Date().toISOString();
+  scheduleSave();
+}
+function execFmt(cmd, val){ document.getElementById('note-editor').focus(); document.execCommand(cmd,false,val||null); saveNoteContent(); }
+function insertCheckbox(){ document.getElementById('note-editor').focus(); document.execCommand('insertHTML',false,'☐ '); saveNoteContent(); }
+function insertLink(){ const url=prompt('Link URL:'); if(!url) return; document.getElementById('note-editor').focus(); document.execCommand('createLink',false,url); saveNoteContent(); }
+function bindNotesHandlers(){
+  const ed = document.getElementById('note-editor');
+  if(ed){
+    ed.addEventListener('input', saveNoteContent);
+    ed.addEventListener('click', (e)=>{
+      if(e.target.nodeType===3) return;
+    });
+    ed.addEventListener('keydown', (e)=>{}); // reserved
+    ed.addEventListener('dblclick', (e)=>{});
+    ed.addEventListener('click', toggleCheckboxOnClick);
+  }
+}
+function toggleCheckboxOnClick(e){
+  // simple checkbox toggling: click right at start of a line containing ☐ / ☑ character
+  const sel = window.getSelection();
+  if(!sel.anchorNode) return;
+  const text = sel.anchorNode.textContent||'';
+  const offset = sel.anchorOffset;
+  if(text[offset-1]==='☐' || text[0]==='☐'){
+    const idx = text.indexOf('☐');
+    if(idx>-1){ sel.anchorNode.textContent = text.slice(0,idx)+'☑'+text.slice(idx+1); saveNoteContent(); }
+  } else if(text[offset-1]==='☑' || text[0]==='☑'){
+    const idx = text.indexOf('☑');
+    if(idx>-1){ sel.anchorNode.textContent = text.slice(0,idx)+'☐'+text.slice(idx+1); saveNoteContent(); }
+  }
+}
+function saveNoteContent(){
+  if(!ACTIVE_NOTE) return;
+  const n=DATA.notes.find(x=>x.id===ACTIVE_NOTE); if(!n) return;
+  n.content = document.getElementById('note-editor').innerHTML;
+  n.updatedAt = new Date().toISOString();
+  scheduleSave();
+}
+function openNoteModal(id, presetCourse){
+  // quick-create via FAB: minimal modal then jump into full editor
+  const body = `
+    <div class="field"><label class="field-label">Title</label><input type="text" id="qn-title" placeholder="Note title"></div>
+    <div class="field"><label class="field-label">Course</label><select id="qn-course"><option value="">— None —</option>${DATA.courses.map(c=>`<option value="${c.id}" ${presetCourse===c.id?'selected':''}>${escapeHtml(c.name)}</option>`).join('')}</select></div>
+    <div class="modal-actions"><span></span><div style="display:flex;gap:10px;"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" onclick="createNote()">Create</button></div></div>
+  `;
+  openModal('New note', body);
+}
+function createNote(){
+  const title=document.getElementById('qn-title').value.trim()||'Untitled note';
+  const courseId=document.getElementById('qn-course').value||null;
+  const n={id:uid(), title, courseId, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(), content:''};
+  DATA.notes.push(n); scheduleSave(); closeModal(); ACTIVE_NOTE=n.id; navigate('notes');
+}
+function deleteNote(id){
+  if(!confirm('Delete this note?')) return;
+  DATA.notes=DATA.notes.filter(n=>n.id!==id); ACTIVE_NOTE=null; scheduleSave(); render();
+}
+function renderNoteCard(n){
+  const plain = n.content? n.content.replace(/<[^>]+>/g,' ').slice(0,90) : 'Empty note';
+  return `<div class="card" style="cursor:pointer;" onclick="navigate('notes','${n.id}')">
+    <div class="card-title">${escapeHtml(n.title||'Untitled')}</div>
+    <div style="font-size:12.5px;color:var(--ink-soft);margin:6px 0;">${escapeHtml(plain)}…</div>
+    <div style="font-size:11px;color:var(--ink-soft);">${fmtDateHuman((n.updatedAt||n.createdAt).slice(0,10))}</div>
+  </div>`;
+}
+
+/* ===================== STUDY PLANNER / POMODORO ===================== */
+let POMO = { running:false, mode:'work', remaining:25*60, work:25, short:5, long:15, sessionsPerRound:4, roundCount:0, courseId:null, interval:null };
+function renderPlanner(){
+  const now=new Date();
+  const weekStart=startOfWeek(now), weekEnd=addDays(weekStart,6);
+  const monthStart=new Date(now.getFullYear(),now.getMonth(),1), monthEnd=new Date(now.getFullYear(),now.getMonth()+1,0);
+  const weekMins=studyMinutesInRange(weekStart,weekEnd), monthMins=studyMinutesInRange(monthStart,monthEnd);
+  const goalMins=(DATA.profile.weeklyGoalHours||15)*60;
+  const goalPct=Math.min(100,Math.round((weekMins/goalMins)*100||0));
+  const upcoming = DATA.sessions.filter(s=>parseISO(s.date)>=new Date(now.toDateString())).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+
+  return `
+  <div class="page-head">
+    <div><h1 class="page-title">Study Planner</h1><div class="page-sub">Plan sessions, track hours, and stay focused</div></div>
+    <button class="btn" onclick="openSessionModal()">${iconPlus()} Add study session</button>
+  </div>
+  <div class="grid g2">
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div class="card">
+        <div class="card-title">This week</div>
+        <div class="serif" style="font-size:30px;font-weight:600;margin:6px 0;">${fmtHM(weekMins)} studied</div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);margin-bottom:6px;"><span>Goal: ${DATA.profile.weeklyGoalHours}h/week</span><span>${goalPct}%</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:${goalPct}%;"></div></div>
+        <hr class="soft">
+        <div style="display:flex;justify-content:space-between;">
+          <div><div class="page-sub">This month</div><div style="font-weight:600;">${fmtHM(monthMins)}</div></div>
+          <div style="text-align:right;"><div class="page-sub">Weekly goal</div>
+            <input type="number" style="width:80px;display:inline-block;" value="${DATA.profile.weeklyGoalHours}" onchange="setWeeklyGoal(this.value)"> h
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Upcoming sessions</div>
+        ${upcoming.length? upcoming.slice(0,6).map(s=>`
+          <div class="deadline-row">
+            <span class="dot" style="background:var(--${courseColor(s.courseId)});"></span>
+            <div style="flex:1;cursor:pointer;" onclick="openSessionModal('${s.id}')">
+              <div style="font-weight:600;font-size:13.5px;">${escapeHtml(courseName(s.courseId))} ${s.topic?'· '+escapeHtml(s.topic):''}</div>
+              <div style="font-size:12px;color:var(--ink-soft);">${fmtDateHuman(s.date)} · ${s.start}–${addMinutesToTime(s.start,s.duration)} ${s.goal? '· '+escapeHtml(s.goal):''}</div>
+            </div>
+            <button class="check-circle ${s.completed?'done':''}" onclick="toggleSessionDone('${s.id}')">${s.completed?iconCheckMini():''}</button>
+          </div>`).join('') : emptyBlock('🎯','No sessions planned','Add a study session to build momentum.')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="text-align:center;">Pomodoro timer</div>
+      <div class="pomo-ring" id="pomo-ring" style="background:conic-gradient(var(--plum) ${pomoPct()}%, var(--line) 0);">
+        <div style="width:172px;height:172px;border-radius:50%;background:var(--paper-raised);display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <div class="pomo-time" id="pomo-time">${fmtTimer(POMO.remaining)}</div>
+          <div style="font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px;">${POMO.mode==='work'?'Focus':'Break'}</div>
+        </div>
+      </div>
+      <div class="pomo-controls">
+        <button class="pomo-round secondary" onclick="resetPomodoro()">${iconReset()}</button>
+        <button class="pomo-round" onclick="togglePomodoro()">${POMO.running?iconPause():iconPlay()}</button>
+        <button class="pomo-round secondary" onclick="openPomoSettings()">${iconGear()}</button>
+      </div>
+      <div class="field" style="margin-top:20px;"><label class="field-label">Studying for</label>
+        <select onchange="POMO.courseId=this.value||null;">
+          <option value="">— No course —</option>${DATA.courses.map(c=>`<option value="${c.id}" ${POMO.courseId===c.id?'selected':''}>${escapeHtml(c.name)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="page-sub" style="text-align:center;">Round ${POMO.roundCount+1} of ${POMO.sessionsPerRound}</div>
+    </div>
+  </div>
+  `;
+}
+function bindPlannerHandlers(){ /* pomodoro is timer-driven, nothing to bind on render */ }
+function setWeeklyGoal(v){ DATA.profile.weeklyGoalHours = parseFloat(v)||1; scheduleSave(); render(); }
+function pomoPct(){ const total = (POMO.mode==='work'?POMO.work:(POMO.roundCount%POMO.sessionsPerRound===POMO.sessionsPerRound-1?POMO.long:POMO.short))*60; return Math.round(((total-POMO.remaining)/total)*100); }
+function fmtTimer(s){ const m=Math.floor(s/60), sec=s%60; return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); }
+function togglePomodoro(){
+  POMO.running=!POMO.running;
+  if(POMO.running){
+    POMO.interval = setInterval(()=>{
+      POMO.remaining--;
+      if(POMO.remaining<=0){ pomodoroPhaseComplete(); }
+      updatePomoDisplay();
+    },1000);
+  } else clearInterval(POMO.interval);
+  render();
+}
+function updatePomoDisplay(){
+  const t=document.getElementById('pomo-time'); if(t) t.textContent=fmtTimer(POMO.remaining);
+  const ring=document.getElementById('pomo-ring'); if(ring) ring.style.background=`conic-gradient(var(--plum) ${pomoPct()}%, var(--line) 0)`;
+}
+function pomodoroPhaseComplete(){
+  clearInterval(POMO.interval); POMO.running=false;
+  if(POMO.mode==='work'){
+    // record study time
+    DATA.sessions.push({id:uid(), courseId:POMO.courseId, date:todayISO(), start: (new Date(Date.now()-POMO.work*60000)).toTimeString().slice(0,5), duration:POMO.work, topic:'Pomodoro session', goal:'', completed:true, source:'pomodoro'});
+    scheduleSave();
+    POMO.roundCount++;
+    const isLong = POMO.roundCount % POMO.sessionsPerRound === 0;
+    POMO.mode='break'; POMO.remaining=(isLong?POMO.long:POMO.short)*60;
+    toast('Focus session logged — time for a break ☕');
+  } else {
+    POMO.mode='work'; POMO.remaining=POMO.work*60;
+    toast('Break over — back to focus 🌱');
+  }
+  render();
+}
+function resetPomodoro(){
+  clearInterval(POMO.interval); POMO.running=false; POMO.mode='work'; POMO.remaining=POMO.work*60; render();
+}
+function startPomodoroQuick(){ if(!POMO.running) togglePomodoro(); }
+function openPomoSettings(){
+  const body = `
+    <div class="field-row">
+      <div class="field"><label class="field-label">Work (min)</label><input type="number" id="pf-work" value="${POMO.work}"></div>
+      <div class="field"><label class="field-label">Short break (min)</label><input type="number" id="pf-short" value="${POMO.short}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Long break (min)</label><input type="number" id="pf-long" value="${POMO.long}"></div>
+      <div class="field"><label class="field-label">Sessions per round</label><input type="number" id="pf-sessions" value="${POMO.sessionsPerRound}"></div>
+    </div>
+    <div class="modal-actions"><span></span><button class="btn" onclick="savePomoSettings()">Save</button></div>
+  `;
+  openModal('Pomodoro settings', body);
+}
+function savePomoSettings(){
+  POMO.work=parseInt(document.getElementById('pf-work').value)||25;
+  POMO.short=parseInt(document.getElementById('pf-short').value)||5;
+  POMO.long=parseInt(document.getElementById('pf-long').value)||15;
+  POMO.sessionsPerRound=parseInt(document.getElementById('pf-sessions').value)||4;
+  resetPomodoro(); closeModal();
+}
+function openSessionModal(id){
+  const s = id? DATA.sessions.find(x=>x.id===id) : null;
+  if(!DATA.courses.length){ openModal('Add study session', emptyBlock('📚','Add a course first','Study sessions need to belong to a course.', `<button class="btn" onclick="closeModal();openCourseModal();">${iconPlus()} Add course</button>`)); return; }
+  const body = `
+    <div class="field"><label class="field-label">Course</label><select id="sf-course">${DATA.courses.map(c=>`<option value="${c.id}" ${s&&s.courseId===c.id?'selected':''}>${escapeHtml(c.name)}</option>`).join('')}</select></div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Date</label><input type="date" id="sf-date" value="${s?s.date:todayISO()}"></div>
+      <div class="field"><label class="field-label">Start time</label><input type="time" id="sf-start" value="${s?s.start:'17:00'}"></div>
+    </div>
+    <div class="field"><label class="field-label">Duration (minutes)</label><input type="number" id="sf-duration" value="${s?s.duration:60}"></div>
+    <div class="field"><label class="field-label">Topic</label><input type="text" id="sf-topic" value="${s?escapeHtml(s.topic||''):''}" placeholder="e.g. Matrices"></div>
+    <div class="field"><label class="field-label">Goal</label><input type="text" id="sf-goal" value="${s?escapeHtml(s.goal||''):''}" placeholder="e.g. Complete exercises 1–10"></div>
+    <div class="modal-actions">
+      ${s? `<button class="btn danger" onclick="deleteSession('${s.id}')">${iconTrash()} Delete</button>`:'<span></span>'}
+      <div style="display:flex;gap:10px;"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveSession('${s?s.id:''}')">Save session</button></div>
+    </div>
+  `;
+  openModal(s?'Edit study session':'Add study session', body);
+}
+function saveSession(id){
+  const payload = { courseId:document.getElementById('sf-course').value, date:document.getElementById('sf-date').value, start:document.getElementById('sf-start').value, duration:parseInt(document.getElementById('sf-duration').value)||30, topic:document.getElementById('sf-topic').value.trim(), goal:document.getElementById('sf-goal').value.trim() };
+  if(id){ Object.assign(DATA.sessions.find(x=>x.id===id), payload); }
+  else DATA.sessions.push(Object.assign({id:uid(), completed:false, source:'planned'}, payload));
+  scheduleSave(); closeModal(); render(); toast('Study session saved');
+}
+function deleteSession(id){ DATA.sessions=DATA.sessions.filter(s=>s.id!==id); scheduleSave(); closeModal(); render(); }
+function toggleSessionDone(id){ const s=DATA.sessions.find(x=>x.id===id); s.completed=!s.completed; scheduleSave(); render(); }
+
+/* ===================== GRADES ===================== */
+function renderGrades(){
+  const overall = overallAverage();
+  return `
+  <div class="page-head">
+    <div><h1 class="page-title">Grades</h1><div class="page-sub">Track performance across your courses</div></div>
+  </div>
+  <div class="card" style="margin-bottom:18px;">
+    <div class="card-title">Semester overview</div>
+    <div class="serif" style="font-size:34px;font-weight:600;margin:8px 0;">${overall!==null? overall.toFixed(1)+' / 20' : '—'}</div>
+    <div class="page-sub">Current semester average</div>
+    <hr class="soft">
+    ${DATA.courses.length? DATA.courses.map(c=>{
+      const avg=courseAverage(c.id);
+      const pct = avg!==null? Math.min(100,(avg/20)*100) : 0;
+      return `<div class="grade-bar-row"><div class="gname">${escapeHtml(c.name)}</div><div class="gtrack"><div class="gfill" style="width:${pct}%;background:var(--${c.colorClass||courseColor(c.id)});"></div></div><div class="gval">${avg!==null?avg.toFixed(1):'—'}</div></div>`;
+    }).join('') : emptyBlock('📊','No courses yet','Add courses to start tracking grades.')}
+  </div>
+  <div class="grid g3">
+    ${DATA.courses.map(c=>renderGradeCourseCard(c)).join('')}
+  </div>
+  `;
+}
+function overallAverage(){
+  const courseAvgs = DATA.courses.map(c=>courseAverage(c.id)).filter(a=>a!==null);
+  if(!courseAvgs.length) return null;
+  return courseAvgs.reduce((a,b)=>a+b,0)/courseAvgs.length;
+}
+function renderGradeCourseCard(c){
+  const items = DATA.grades[c.id]||[];
+  const avg = courseAverage(c.id);
+  return `<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div class="card-title">${escapeHtml(c.name)}</div>
+      <span class="serif" style="font-weight:600;font-size:16px;color:var(--${c.colorClass||courseColor(c.id)});">${avg!==null?avg.toFixed(1):'—'}</span>
+    </div>
+    ${items.length? items.map((it,i)=>`<div class="deadline-row"><div style="flex:1;"><div style="font-weight:600;font-size:13px;">${escapeHtml(it.label)}</div><div style="font-size:11.5px;color:var(--ink-soft);">${escapeHtml(it.type)} · coef ${it.coefficient}</div></div><div style="font-weight:600;">${it.grade}/20</div><button class="btn ghost" onclick="deleteGradeItem('${c.id}',${i})">${iconTrash()}</button></div>`).join('') : `<div class="page-sub" style="padding:10px 0;">No grades logged yet</div>`}
+    <button class="btn secondary" style="margin-top:8px;width:100%;justify-content:center;" onclick="openGradeModal('${c.id}')">${iconPlus()} Add grade</button>
+  </div>`;
+}
+function openGradeModal(courseId){
+  const body = `
+    <div class="field"><label class="field-label">Label</label><input type="text" id="gf-label" placeholder="e.g. Midterm, TD 3, Commentaire"></div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Type</label><select id="gf-type">${['CM','TD','TP','Exam','Other'].map(t=>`<option>${t}</option>`).join('')}</select></div>
+      <div class="field"><label class="field-label">Grade (/20)</label><input type="number" step="0.1" id="gf-grade" placeholder="14.5"></div>
+    </div>
+    <div class="field"><label class="field-label">Coefficient / weight</label><input type="number" step="0.1" id="gf-coef" value="1"></div>
+    <div class="modal-actions"><span></span><div style="display:flex;gap:10px;"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveGradeItem('${courseId}')">Save</button></div></div>
+  `;
+  openModal('Add grade', body);
+}
+function saveGradeItem(courseId){
+  const label=document.getElementById('gf-label').value.trim()||'Grade';
+  const grade=parseFloat(document.getElementById('gf-grade').value);
+  if(isNaN(grade)){ toast('Enter a grade'); return; }
+  const coef=parseFloat(document.getElementById('gf-coef').value)||1;
+  const type=document.getElementById('gf-type').value;
+  DATA.grades[courseId]=DATA.grades[courseId]||[];
+  DATA.grades[courseId].push({id:uid(), label, type, grade, coefficient:coef});
+  scheduleSave(); closeModal(); render(); toast('Grade added');
+}
+function deleteGradeItem(courseId, idx){ DATA.grades[courseId].splice(idx,1); scheduleSave(); render(); }
+
+/* ===================== SETTINGS ===================== */
+function renderSettings(){
+  const p=DATA.profile;
+  return `
+  <div class="page-head"><div><h1 class="page-title">Settings</h1><div class="page-sub">Customize your academic info and preferences</div></div></div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title">Academic profile</div>
+      <div class="field"><label class="field-label">Name</label><input type="text" id="set-name" value="${escapeHtml(p.name)}"></div>
+      <div class="field"><label class="field-label">University</label><input type="text" id="set-uni" value="${escapeHtml(p.university)}"></div>
+      <div class="field"><label class="field-label">Program</label><input type="text" id="set-program" value="${escapeHtml(p.program)}"></div>
+      <div class="field-row">
+        <div class="field"><label class="field-label">Year</label><input type="text" id="set-year" value="${escapeHtml(p.year)}"></div>
+        <div class="field"><label class="field-label">Semester</label><input type="text" id="set-sem" value="${escapeHtml(p.semester)}"></div>
+      </div>
+      <button class="btn" onclick="saveProfileSettings()">Save profile</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div class="card">
+        <div class="card-title">Appearance</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+          <span>Dark mode</span>
+          <button class="btn secondary" onclick="toggleTheme()">${p.theme==='dark'?'Switch to light':'Switch to dark'}</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Notifications</div>
+        <div class="field" style="margin-top:10px;"><label class="field-label">Remind me before an exam (hours)</label><input type="number" id="set-notif-exam" value="${p.notif.examHours}"></div>
+        <div class="field"><label class="field-label">Remind me before a task deadline (hours)</label><input type="number" id="set-notif-task" value="${p.notif.taskHours}"></div>
+        <button class="btn" onclick="saveNotifSettings()">Save reminders</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Study goal</div>
+        <div class="field" style="margin-top:10px;"><label class="field-label">Weekly study goal (hours)</label><input type="number" id="set-goal" value="${p.weeklyGoalHours}"></div>
+        <button class="btn" onclick="saveGoalSettings()">Save goal</button>
+      </div>
+    </div>
+  </div>
+  `;
+}
+function saveProfileSettings(){
+  DATA.profile.name=document.getElementById('set-name').value.trim();
+  DATA.profile.university=document.getElementById('set-uni').value.trim();
+  DATA.profile.program=document.getElementById('set-program').value.trim();
+  DATA.profile.year=document.getElementById('set-year').value.trim();
+  DATA.profile.semester=document.getElementById('set-sem').value.trim();
+  scheduleSave(); render(); toast('Profile updated');
+}
+function saveNotifSettings(){
+  DATA.profile.notif.examHours=parseFloat(document.getElementById('set-notif-exam').value)||24;
+  DATA.profile.notif.taskHours=parseFloat(document.getElementById('set-notif-task').value)||24;
+  scheduleSave(); toast('Reminder settings saved');
+}
+function saveGoalSettings(){
+  DATA.profile.weeklyGoalHours=parseFloat(document.getElementById('set-goal').value)||15;
+  scheduleSave(); toast('Weekly goal updated');
+}
+
+/* ===================== BOOT ===================== */
+(async function init(){
+  document.getElementById('app').innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:'Fraunces',serif;color:var(--ink-soft);">Loading Almanac…</div>`;
+  await loadData();
+  render();
+  document.addEventListener('click', (e)=>{
+    if(FAB_OPEN && !e.target.closest('.fab') && !e.target.closest('.fab-menu')) closeFab();
+  });
+})();
+</script>
+</body>
+</html>
